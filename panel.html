@@ -13,60 +13,55 @@
         rel="stylesheet">
 
 </head>
+
 <body>
     <div class="title-wrapper">
-        <!-- <img src="img/logo.png" class="logo"  /> -->
+        <img src="img/logo.png" class="logo"  />
         <!-- <h1>FABRIZIO</h1> -->
     </div>
-    <div class = "favorites">
 
-    </div>
+    <details class="panel-section">
+        <summary>Favorites</summary>
+        <div class="favorites">
+        </div>
+    </details>
 
-    <div class="container">
+    <details open class="panel-section">
+        <summary>Global search</summary>
         <div class="global--search">
-        <!-- <h3>Global Search</h3> -->
-        <form class="global--ws">
-            <h3>Workspace</h3>
-            <input type="text"  placeholder="workspace..." class="input--global--ws">
-            <div class="global--found-ws" ></div>
-            <div class="global--clicked-ws"></div>
-            <!-- <button class="btn--global--wsForm">
+            <!-- <h3>Global Search</h3> -->
+            <form class="global--ws">
+                <h3>Workspace</h3>
+                <input type="text" placeholder="workspace..." class="input--global--ws">
+                <div class="global--found-ws"></div>
+                <div class="global--clicked-ws"></div>
+                <!-- <button class="btn--global--wsForm">
                 🔎
             </button> -->
-            <!-- <datalist id="global-workspace-list"></datalist> -->
-        </form>
-        <form class="global--item item--hidden"  >
-            <!-- <form class="global--item" style="display: none;"> -->
-            <h3>Item</h3>
-            <input type="text" placeholder="item..." class="input--global--item">
-            <div class="item-type-filters"></div>
-            <div class="global--found-item"></div>
-            <div class="global--clicked-item"></div>
-        </form>
-    </div>
+                <!-- <datalist id="global-workspace-list"></datalist> -->
+            </form>
+            <form class="global--item item--hidden">
+                <!-- <form class="global--item" style="display: none;"> -->
+                <h3>Item</h3>
+                <input type="text" placeholder="item..." class="input--global--item">
+                <div class="item-type-filters"></div>
+                <div class="global--found-item"></div>
+                <div class="global--clicked-item"></div>
+            </form>
+        </div>
+    </details>
 
-        <form class="getConnectionInfo">
-            <h3>Get Connection Info</h2>
-                <input type="text" placeholder="connection id..." class="input--getConnectionInfo">
-                <!-- <button class="btn--getConnectionInfo">
-                    🔎
-                </button> -->
-        </form>
-        <!-- <form class="getWorkspaceName">
-            <h3>Get Workspace Name</h2>
-                <input type="text" placeholder="workspace id..." class="input--getWorkspaceName">
-                <button class="btn--getWorkspaceName">
-                    🔎
-                </button>
-        </form>
-        <form class="getWorkspaceId">
-            <h3>Get Workspace Id</h2>
-                <input type="text" placeholder="workspace name..." class="input--getWorkspaceId">
-                <button class="btn--getWorkspaceId">
-                    🔎
-                </button>
-        </form> -->
-    </div>
+    <details class="panel-section">
+        <summary>Utilites</summary>
+        <div class="other--tools">
+            <form class="getConnectionInfo">
+                <h3>Get Connection Info</h2>
+                    <input type="text" placeholder="connection id..." class="input--getConnectionInfo">
+
+            </form>
+
+        </div>
+    </details>
 </body>
 
 </html>

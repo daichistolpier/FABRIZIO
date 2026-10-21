@@ -6,7 +6,7 @@ import {
 } from "./fabricAPIs.js";
 
 import {
-    container,
+    // container,
     inputGetConnectionInfo,
     getConnectionInfoDiv,
     wsFormInput,
@@ -35,8 +35,7 @@ import {
     renderFavLinks,
     renderTypeFilters,
     renderLatestRuns,
-    showFavItemHistoryRuns,
-    saveNewLinkName
+    showFavItemHistoryRuns
 } from "./panelRendering.js"
 
 // GET TOKEN
@@ -224,7 +223,11 @@ itemTypeFilters.addEventListener("click", e => {
     e.preventDefault();
     if (e.target.tagName !== "BUTTON") return;
     const button = e.target;
-    button.classList.toggle("active-filter");
+    itemTypeFilters
+        .querySelectorAll("button")
+        .forEach(btn => btn.classList.remove("active"));
+
+    button.classList.add("active");
     selectedTypeFilter = e.target.dataset.type;
     filterWsAndItems(allItems, itemFormInput, itemFoundContainer, "fabricItem", selectedTypeFilter, true);
 });
@@ -291,22 +294,39 @@ itemInfoContainer.addEventListener("click", async (e) => {
         // renderFavLinks(favContainer, favoriteLinks);
     }
     //SEE ITEM HISTORY
-    else if (e.target.closest("button")?.classList.contains("fabricItem--history")) {
+    else if (e.target.closest("button")?.classList.contains("fabricItem--history")
+        ||
+        e.target.closest("button")?.classList.contains("button--refresh--history")) {
         e.preventDefault();
 
         const existingHistory = itemInfoContainer.querySelector(".run-history-container");
         const noHistoryFound = itemInfoContainer.querySelector(".no--history--found");
 
-        if (existingHistory) {
-            existingHistory.hidden = !existingHistory.hidden;
-            return;
+        const isRefresh =
+            e.target.closest("button")?.classList.contains(
+                "button--refresh--history"
+            );
+
+        if (!isRefresh) {
+            if (existingHistory) {
+                existingHistory.hidden = !existingHistory.hidden;
+                return;
+            }
+            if (noHistoryFound) {
+                noHistoryFound.hidden = !noHistoryFound.hidden;
+                return;
+            }
         }
-        if (noHistoryFound) {
-            noHistoryFound.hidden = !noHistoryFound.hidden;
-            return;
+        else {
+            existingHistory?.remove();
+            noHistoryFound?.remove();
         }
         
-        const itemContainer = e.target.closest(".global--clicked-item").querySelector(".fabricItem--container");
+        // const itemContainer = e.target.closest(".global--clicked-item").querySelector(".fabricItem--container");
+        const itemContainer =
+            itemInfoContainer.querySelector(
+                ".fabricItem--container"
+            );
 
         const workspaceId = itemContainer.dataset.wsId;
         const itemId = itemContainer.dataset.objectId;
@@ -327,6 +347,8 @@ itemInfoContainer.addEventListener("click", async (e) => {
         // render history runs
         const runContainer = renderLatestRuns (jobInstJson, workspaceId, itemId, objectType)
         if (runContainer) itemInfoContainer.append(runContainer);
+
+
     }
     // SEE FAIL MESSAGE
     else if (e.target.closest("button")?.classList.contains("info--fail--button")) {
@@ -357,7 +379,26 @@ favContainer.addEventListener("click", async (e) => {
         }
         case e.target.classList.contains("history-icon"): {
             e.preventDefault();
-            await showFavItemHistoryRuns(e, token);
+            const itemContainer = e.target.closest(".link--item--div");
+            await showFavItemHistoryRuns(itemContainer, token);
+            break;
+        }
+        // refresh history
+        case e.target.classList.contains("refresh--icon"): {
+            e.preventDefault();
+
+            const itemContainer = e.target.closest(".link--item--div");
+
+            const existingHistory =
+                itemContainer?.querySelector(".run-history-container");
+
+            const noHistoryFound =
+                itemContainer?.querySelector(".no--history--found");
+
+            existingHistory?.remove();
+            noHistoryFound?.remove();
+
+            await showFavItemHistoryRuns(itemContainer, token);
             break;
         }
         case (e.target.classList.contains("error-info")): 

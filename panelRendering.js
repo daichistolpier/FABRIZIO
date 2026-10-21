@@ -64,6 +64,7 @@ export async function renameFavLink(event, favoriteLinks, favContainer) {
 
     const itemNameDiv = linkItemAnchor.querySelector(".fav--item-name");
     
+    
 
     itemNameDiv.replaceWith(input);
     // linkItemAnchor.replaceWith(input);
@@ -271,9 +272,9 @@ function createRenameButton() {
 
 export function renderFavLinks(whereToRender, favoriteLinksList){
     whereToRender.innerHTML = '';
-    const favHeader = document.createElement("h3");
-    favHeader.textContent = "Favorites";
-    whereToRender.append(favHeader)
+    // const favHeader = document.createElement("h3");
+    // favHeader.textContent = "Favorites";
+    // whereToRender.append(favHeader)
     const favLinkList = document.createElement("div");
     favLinkList.classList.add("favLinkList");
 
@@ -286,6 +287,7 @@ export function renderFavLinks(whereToRender, favoriteLinksList){
         itemNameDiv.classList.add("fav--item-name");
 
         itemNameDiv.textContent = favLink.displayName;
+        itemNameDiv.title = favLink.displayName;
 
         linkItemAnch.append(itemNameDiv);
 
@@ -362,10 +364,7 @@ function createHistoryIcon() {
 }
 
 
-export async function showFavItemHistoryRuns(event, token) {
-    const itemContainer =
-        event.target.closest(".link--item--div");
-
+export async function showFavItemHistoryRuns(itemContainer, token) {
     const existingHistory =
         itemContainer.querySelector(".run-history-container");
 
@@ -397,6 +396,7 @@ export async function showFavItemHistoryRuns(event, token) {
         const noHistFound = document.createElement("div");
 
         noHistFound.classList.add("no--history--found");
+        noHistFound.classList.add("run-history-container")
         noHistFound.textContent = "No runs were found...";
 
         itemContainer.append(noHistFound);
@@ -416,13 +416,31 @@ export async function showFavItemHistoryRuns(event, token) {
     }
 }
 
+function createRefreshHistoryButton(){
+    const refreshHistoryBtn = document.createElement("button");
+    refreshHistoryBtn.classList.add("button--refresh--history")
+
+    const refreshIcon = document.createElement("img");
+    refreshIcon.src = chrome.runtime.getURL("img/refresh.png");
+    refreshIcon.alt = "refresh history icon";
+    refreshIcon.classList.add("refresh--icon");
+
+    refreshHistoryBtn.appendChild(refreshIcon);
+    return refreshHistoryBtn 
+}
+
 export function renderLatestRuns (jobInstJson, workspaceId, itemId, objectType) {
     const latestRuns = jobInstJson.value
         .sort((a, b) => new Date(b.startTimeUtc) - new Date(a.startTimeUtc))
-        .slice(0, 10);
+        .slice(0, 15);
 
     const runContainer = document.createElement("div");
     runContainer.classList.add("run-history-container")
+    // add refresh history button
+    const refreshHistoryBtn = createRefreshHistoryButton();
+    runContainer.append(refreshHistoryBtn)
+
+
     const runContainerTitle = document.createElement("h4");
     runContainerTitle.classList.add("history--title")
     runContainerTitle.textContent = "History"

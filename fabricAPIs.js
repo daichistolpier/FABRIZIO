@@ -128,7 +128,7 @@ export async function getJobInstance(workspaceId, itemId, type, token) {
 
     if (!getJobInstanceResponse.ok) {
         const httpStatus = getJobInstanceResponse.status;
-        const errorText = getJobInstanceJson.message ?? JSON.stringify(getConngetJobInstanceJsonectionJson);
+        const errorText = getJobInstanceJson.message ?? JSON.stringify(getJobInstanceJson);
 
         return `HTTP Status ${httpStatus}\n${errorText}`
 
