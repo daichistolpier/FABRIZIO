@@ -1,0 +1,27 @@
+{
+    "manifest_version" : 3,
+    "name" : "Fabrizio",
+    "version" : "1.0.0",
+    "icons": {
+    "16": "img/moustache.png",
+    "32": "img/moustache.png",
+    "48": "img/moustache.png",
+    "128": "img/moustache.png"
+  },
+    "permissions": ["tabs", "sidePanel", "activeTab", "contextMenus", "storage"],
+    "side_panel" : {
+        "default_path": "panel.html"
+    },
+    "background" : {
+        "service_worker" : "background.js",
+        "type" : "module"
+    },
+    "content_scripts": [
+        {
+        "matches": ["*://*.fabric.microsoft.com/*"],
+          "js": ["content-script.js"]
+        }
+      ],
+    "action" : {}
+
+}

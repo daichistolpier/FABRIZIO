@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script defer src="panel.js" type="module"></script>
+    <link rel="stylesheet" href="panel.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&family=Sansation:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap"
+        rel="stylesheet">
+
+</head>
+<body>
+    <div class="title-wrapper">
+        <!-- <img src="img/logo.png" class="logo"  /> -->
+        <!-- <h1>FABRIZIO</h1> -->
+    </div>
+    <div class = "favorites">
+
+    </div>
+
+    <div class="container">
+        <div class="global--search">
+        <!-- <h3>Global Search</h3> -->
+        <form class="global--ws">
+            <h3>Workspace</h3>
+            <input type="text"  placeholder="workspace..." class="input--global--ws">
+            <div class="global--found-ws" ></div>
+            <div class="global--clicked-ws"></div>
+            <!-- <button class="btn--global--wsForm">
+                🔎
+            </button> -->
+            <!-- <datalist id="global-workspace-list"></datalist> -->
+        </form>
+        <form class="global--item item--hidden"  >
+            <!-- <form class="global--item" style="display: none;"> -->
+            <h3>Item</h3>
+            <input type="text" placeholder="item..." class="input--global--item">
+            <div class="item-type-filters"></div>
+            <div class="global--found-item"></div>
+            <div class="global--clicked-item"></div>
+        </form>
+    </div>
+
+        <form class="getConnectionInfo">
+            <h3>Get Connection Info</h2>
+                <input type="text" placeholder="connection id..." class="input--getConnectionInfo">
+                <!-- <button class="btn--getConnectionInfo">
+                    🔎
+                </button> -->
+        </form>
+        <!-- <form class="getWorkspaceName">
+            <h3>Get Workspace Name</h2>
+                <input type="text" placeholder="workspace id..." class="input--getWorkspaceName">
+                <button class="btn--getWorkspaceName">
+                    🔎
+                </button>
+        </form>
+        <form class="getWorkspaceId">
+            <h3>Get Workspace Id</h2>
+                <input type="text" placeholder="workspace name..." class="input--getWorkspaceId">
+                <button class="btn--getWorkspaceId">
+                    🔎
+                </button>
+        </form> -->
+    </div>
+</body>
+
+</html>
