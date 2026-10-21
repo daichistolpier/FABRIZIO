@@ -75,7 +75,7 @@ if (favoriteLinks && favoriteLinks?.length) {
 //// INIT WS
 if (selectedWs) {
     wsFoundContainer.innerHTML = "";
-    renderClickedObject("workspace", selectedWs, wsInfoContainer);
+    renderClickedObject("workspace", selectedWs, wsInfoContainer, favoriteLinks);
     itemFormInput.disabled = false; //
     itemFormContainer.style.display = "block";
 }
@@ -83,7 +83,7 @@ if (selectedWs) {
 /// INIT ITEMS
 if(selectedItems ){
     console.log(selectedItems, "selectedItems")
-    renderClickedObject("fabricItem", selectedItems, itemInfoContainer)
+    renderClickedObject("fabricItem", selectedItems, itemInfoContainer, favoriteLinks)
 }
 
 
@@ -143,7 +143,7 @@ wsFoundContainer.addEventListener("click", async e =>{
         }
     });
 
-    renderClickedObject("workspace", wsInfo, wsInfoContainer);
+    renderClickedObject("workspace", wsInfo, wsInfoContainer, favoriteLinks);
     wsFormInput.value = selectedWs.displayName;
 
     // resetting item clicked container
@@ -168,6 +168,10 @@ wsInfoContainer.addEventListener("click", async (e) => {
     // if ( favoriteLinks.find(item => item.url === wsLink.href) ) return;
     if ( favoriteLinks.find(item => item.objectId === wsId && item.type === "workspace") ) return;
     
+    // change star color
+    button.querySelector("img").src = chrome.runtime.getURL("img/starfill.png")
+    
+    //save to favorites
     favoriteLinks.push({
         displayName : wsName.textContent, 
         type: "workspace",
@@ -176,7 +180,7 @@ wsInfoContainer.addEventListener("click", async (e) => {
     })
 
     await browser.storage.local.set({ "fabrizioFavLinks": favoriteLinks });
-    renderFavLinks(favContainer, favoriteLinks);
+    // renderFavLinks(favContainer, favoriteLinks);
 
 })
 
@@ -219,6 +223,8 @@ itemFormInput.addEventListener("input", () => {
 itemTypeFilters.addEventListener("click", e => {
     e.preventDefault();
     if (e.target.tagName !== "BUTTON") return;
+    const button = e.target;
+    button.classList.toggle("active-filter");
     selectedTypeFilter = e.target.dataset.type;
     filterWsAndItems(allItems, itemFormInput, itemFoundContainer, "fabricItem", selectedTypeFilter, true);
 });
@@ -242,7 +248,7 @@ itemFoundContainer.addEventListener("click", async e =>{
         }
     }); 
 
-    renderClickedObject("fabricItem", itemInfo, itemInfoContainer)
+    renderClickedObject("fabricItem", itemInfo, itemInfoContainer, favoriteLinks)
 
     itemFormInput.value = name;
     hideItemDropdown();
@@ -262,6 +268,11 @@ itemInfoContainer.addEventListener("click", async (e) => {
         // if ( favoriteLinks.find(item => item.url === itemLink) ) return;
         if ( favoriteLinks.find(item => item.objectId === itemCtn.dataset.objectId && item.type === itemCtn.dataset.objectType ) ) return;
         
+        // fill in star
+        const starIcon = itemCtn.querySelector(".save--star-icon")
+        console.log("starIcon", starIcon)
+        starIcon.src = chrome.runtime.getURL("img/starfill.png")
+        
         allWorkspaces = await reloadWorkspaces();
 
         const workspaceName = allWorkspaces.find(item => {
@@ -277,7 +288,7 @@ itemInfoContainer.addEventListener("click", async (e) => {
         })
     
         await browser.storage.local.set({ "fabrizioFavLinks": favoriteLinks });
-        renderFavLinks(favContainer, favoriteLinks);
+        // renderFavLinks(favContainer, favoriteLinks);
     }
     //SEE ITEM HISTORY
     else if (e.target.closest("button")?.classList.contains("fabricItem--history")) {
@@ -331,7 +342,12 @@ itemInfoContainer.addEventListener("click", async (e) => {
 favContainer.addEventListener("click", async (e) => {
     switch (true) {
         case e.target.closest("button")?.classList.contains("button--remove--link"): {
-            favoriteLinks = await removeFavLink(e, favoriteLinks, favContainer)
+            favoriteLinks = await removeFavLink(e, favoriteLinks, favContainer);
+            // re-render the ws info
+            renderClickedObject("workspace", selectedWs, wsInfoContainer, favoriteLinks);
+
+            // re-render the item info
+            renderClickedObject("fabricItem", selectedItems, itemInfoContainer, favoriteLinks)
             break;
         }
         case e.target.closest("button")?.classList.contains("button--rename--link"): {

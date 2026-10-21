@@ -147,7 +147,7 @@ export function filterWsAndItems(listToFilter, inputForm, filteredItemsContainer
 
 }
 
-export function renderClickedObject(fabricObjectType, item, whereToRender) {
+export function renderClickedObject(fabricObjectType, item, whereToRender, favLinkList) {
     if (!item) return;
     console.log("item", item)
     let favStarIcon = null;
@@ -167,8 +167,8 @@ export function renderClickedObject(fabricObjectType, item, whereToRender) {
         itemContainer.dataset.objectType = "workspace";
         itemContainer.dataset.objectId = item.id;
 
-        const fullFabricUrl = `${baseFabricUrl}/${item.id}`;
-        ({favStarIcon, goToAnchor} = createSaveIcon(fabricObjectType, fullFabricUrl ));        
+        const fullFabricUrl = `${baseFabricUrl}/${item.id}?experience=fabric-developer`;
+        ({favStarIcon, goToAnchor} = createSaveIcon(fabricObjectType, fullFabricUrl, favLinkList,  item.id ));        
     }
     else if (fabricObjectType === "fabricItem"){
         itemContainer.dataset.objectType = item.type;
@@ -184,8 +184,8 @@ export function renderClickedObject(fabricObjectType, item, whereToRender) {
         }
         // does it have a goto?
         if (urlMapping){
-            const fullFabricUrl = `${baseFabricUrl}/${item.workspaceId}/${urlMapping}/${item.id}`;
-            ({favStarIcon, goToAnchor} = createSaveIcon(fabricObjectType, fullFabricUrl ));
+            const fullFabricUrl = `${baseFabricUrl}/${item.workspaceId}/${urlMapping}/${item.id}?experience=fabric-developer`;
+            ({favStarIcon, goToAnchor} = createSaveIcon(fabricObjectType, fullFabricUrl, favLinkList, item.id ));
         }
     }
     itemContainer.append(title);
@@ -199,13 +199,26 @@ export function renderClickedObject(fabricObjectType, item, whereToRender) {
 
 }
 
-function createSaveIcon(type, fullFabricUrl) {
+function createSaveIcon(type, fullFabricUrl, favLinkList, itemId) {
     const favStarIcon = document.createElement("button");
     // favStarIcon.textContent = "⭐";
     favStarIcon.classList.add(`${type}--save`);
 
     const starImg = document.createElement("img");
-    starImg.src = chrome.runtime.getURL("img/star.png");
+    // fill in or empty the star
+    // console.log("star icon", itemId)
+    const foundInFav = favLinkList.find(
+        item => item.objectId === itemId
+    )
+    if (foundInFav) {
+        starImg.classList.add("saved")
+        starImg.src = chrome.runtime.getURL("img/starfill.png");
+    }
+    else {
+        starImg.classList.add("not-saved")
+        starImg.src = chrome.runtime.getURL("img/star.png");
+    }
+
     starImg.alt = "Save to favorites";
     starImg.classList.add("save--star-icon");
     favStarIcon.appendChild(starImg);
@@ -462,8 +475,9 @@ export function renderSingleRun(run, objectType,  workspaceId, itemId) {
     runItem.append(runTimediv);
 
     //fill invoke type
-    invokeTypediv.textContent = `Invoke type: ${run.invokeType}`
-    runItem.append(invokeTypediv)
+    if (run.invokeType) {
+        invokeTypediv.textContent = `Invoke type: ${run.invokeType}`
+        runItem.append(invokeTypediv)}
 
 
     if (failMessage) {
@@ -484,12 +498,30 @@ export function renderSingleRun(run, objectType,  workspaceId, itemId) {
 
     // append goTo
     let runLinkUrl = ''
-    if(objectType === "DataPipeline") runLinkUrl = `https://app.fabric.microsoft.com/workloads/data-pipeline/monitoring/workspaces/${workspaceId}/pipelines/${itemId}/${run.id}`
-    else if(objectType === "SemanticModel") runLinkUrl = `https://app.fabric.microsoft.com/groups/${workspaceId}/datasets/${itemId}/refreshdetails/${run.id}`
+    if(objectType === "DataPipeline") runLinkUrl = `https://app.fabric.microsoft.com/workloads/data-pipeline/monitoring/workspaces/${workspaceId}/pipelines/${itemId}/${run.id}?experience=fabric-developer`
+    else if(objectType === "SemanticModel") runLinkUrl = `https://app.fabric.microsoft.com/groups/${workspaceId}/datasets/${itemId}/refreshdetails/${run.id}?experience=fabric-developer`
     const goToAnchor = createGoToIcon(runLinkUrl);
     runActionBar.append(goToAnchor);
     return runItem;
 
+}
+
+function getFailureMessage(run) {
+    if (run.failureReason?.message) {
+        return run.failureReason.message;
+    }
+
+    if (run.serviceExceptionJson) {
+        try {
+            return JSON.parse(
+                run.serviceExceptionJson
+            ).errorDescription;
+        } catch {
+            return run.serviceExceptionJson;
+        }
+    }
+
+    return null;
 }
 
 function getStatusTitle(run) {
@@ -504,27 +536,20 @@ function getStatusTitle(run) {
         case "inprogress":
             stateImg = addImage("img/running.png", "running", "running")
             statusInfo = "Running";
-            // statusName.classList.add("status--running");
             break;
         case "failed":
             stateImg = addImage("img/error.png", "error", "error")
             statusInfo = "Failed";
-            // statusName.classList.add("status--failed");
-            // fill failure type
-            failMessage = run?.failureReason?.message || null
-            // if (failMessage) {
-            //     failurediv.textContent = `${failMessage}`;
-            // }
+            // failMessage = run?.failureReason?.message || null
+            failMessage = getFailureMessage(run)
             break;
         case "completed":
             statusInfo = "Completed";
             stateImg = addImage("img/done.png", "done", "done")
-            // statusName.classList.add("status--completed");
             break;
         case "cancelled":
             statusInfo = "Cancelled";
             stateImg = addImage("img/disabled.png", "disabled", "disabled")
-            // statusName.classList.add("status--cancelled");
             break;
         default:
             statusInfo = run.status;
@@ -546,14 +571,32 @@ function addImage(imgPath, alt, className) {
 }
 
 function getRuntimeInfo(run) {
-    return run.endTimeUtc
-        ? `${formatDateTimeHistory(run.startTimeUtc)} → ${new Date(run.endTimeUtc).toLocaleTimeString([], {
+    const startTime =
+        run.startTimeUtc ?? run.startTime;
+
+    const endTime =
+        run.endTimeUtc ?? run.endTime;
+
+    if (!endTime) {
+        return `${formatDateTimeHistory(startTime)} → Running`;
+    }
+
+    return `${formatDateTimeHistory(startTime)} → ${new Date(endTime)
+        .toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit"
-        })}`
-        : `${formatDateTimeHistory(run.startTimeUtc)} → Running`;
-
+        })}`;
 }
+
+// function getRuntimeInfo(run) {
+//     return run.endTimeUtc
+//         ? `${formatDateTimeHistory(run.startTimeUtc || run.startTime)} → ${new Date(run.endTimeUtc || run.startTime).toLocaleTimeString([], {
+//             hour: "2-digit",
+//             minute: "2-digit"
+//         })}`
+//         : `${formatDateTimeHistory(run.startTimeUtc)} → Running`;
+
+// }
 
 export const formatDateTimeHistory = (dateString) =>
 new Date(dateString).toLocaleString([], {
