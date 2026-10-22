@@ -61,6 +61,7 @@ let selectedTypeFilter = "All";
 let allWorkspaces = null;
 let allItems = null;
 itemFormInput.disabled = true;
+itemFormInput.placeholder = 'Select a workspace first...';
 
 // INIT VISUAL
 hideWsDropdown();
@@ -76,6 +77,7 @@ if (selectedWs) {
     wsFoundContainer.innerHTML = "";
     renderClickedObject("workspace", selectedWs, wsInfoContainer, favoriteLinks);
     itemFormInput.disabled = false; //
+    itemFormInput.placeholder = "item..."
     itemFormContainer.style.display = "block";
 }
 
@@ -105,6 +107,7 @@ wsFormInput.addEventListener("focus", async (e) => {
     renderFiltWsAndItems(allWorkspaces, wsFoundContainer, "fabricWs");
     allItems = null;
     itemFormInput.disabled = true;
+    itemFormInput.placeholder = 'Select a workspace first...';
     wsFormInput.value = ''
 
     // reset cache
@@ -149,6 +152,7 @@ wsFoundContainer.addEventListener("click", async e =>{
     itemInfoContainer.innerHTML = ''
     hideWsDropdown();
     itemFormInput.disabled = false;
+    itemFormInput.placeholder = 'item...';
     hideItemDropdown();
     hideTypeFilters(); 
 })
@@ -456,7 +460,7 @@ getConnectionInfoDiv.addEventListener("submit", async (e) =>{
 
 
 // CLOSE CARDS LISTENER
-document.addEventListener("click", (e) => {
+document.addEventListener("mousedown", (e) => {
     const insideWsSearch =
         wsFormInput.contains(e.target) ||
         wsFoundContainer.contains(e.target);

@@ -22,3 +22,7 @@
 // add type to favortype as tag
 // chips default all
 // history show date in -> if differennt from previous one
+
+// wsSelected stays the same in wsInfo
+
+// add type in info container
