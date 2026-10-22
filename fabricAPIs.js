@@ -124,7 +124,7 @@ export async function getJobInstance(workspaceId, itemId, type, token) {
     )
 
     const getJobInstanceJson = await getJobInstanceResponse.json();
-    console.log(getJobInstanceJson)
+    // console.log(getJobInstanceJson)
 
     if (!getJobInstanceResponse.ok) {
         const httpStatus = getJobInstanceResponse.status;

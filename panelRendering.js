@@ -367,9 +367,13 @@ function createHistoryIcon() {
 export async function showFavItemHistoryRuns(itemContainer, token) {
     const existingHistory =
         itemContainer.querySelector(".run-history-container");
+        console.log("existingHistory", existingHistory)
+    
+        console.log("before", existingHistory?.hidden);
 
     if (existingHistory) {
-        existingHistory.hidden = !existingHistory.hidden;
+        // existingHistory.hidden = !existingHistory.hidden;
+        existingHistory.classList.toggle("hidden");
         return;
     }
 
@@ -377,7 +381,8 @@ export async function showFavItemHistoryRuns(itemContainer, token) {
         itemContainer.querySelector(".no--history--found");
 
     if (noHistory) {
-        noHistory.hidden = !noHistory.hidden;
+        // noHistory.hidden = !noHistory.hidden;
+        noHistoryFound.classList.toggle("hidden");
         return;
     }
 
@@ -438,13 +443,19 @@ export function renderLatestRuns (jobInstJson, workspaceId, itemId, objectType) 
     runContainer.classList.add("run-history-container")
     // add refresh history button
     const refreshHistoryBtn = createRefreshHistoryButton();
-    runContainer.append(refreshHistoryBtn)
 
+    const runHeaderDiv = document.createElement("div");
+    runHeaderDiv.classList.add("history-header");
 
     const runContainerTitle = document.createElement("h4");
+    
     runContainerTitle.classList.add("history--title")
     runContainerTitle.textContent = "History"
-    runContainer.append(runContainerTitle)
+
+    runHeaderDiv.append(runContainerTitle)
+    runHeaderDiv.append(refreshHistoryBtn)
+
+    runContainer.append(runHeaderDiv)
 
     latestRuns.forEach(run => {
         const runItem = renderSingleRun(run, objectType, workspaceId, itemId);
@@ -509,7 +520,8 @@ export function renderSingleRun(run, objectType,  workspaceId, itemId) {
 
         infoFailButton.appendChild(infoImg)
         
-        statusName.append(infoFailButton)
+        runActionBar.append(infoFailButton)
+        // statusName.append(infoFailButton)
         // statusdiv.append(infoFailButton)
         runItem.append(failurediv)
     }

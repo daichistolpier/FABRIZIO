@@ -14,6 +14,8 @@
     --panel-mint: #edf7f3;
     --panel-hover: #e8f4ee;
 
+    --failure-box : #c7c7c7;
+
     --accent: #168363;
     --accent-hover: #116b50;
     --accent-bright: #16a77b;
@@ -297,7 +299,7 @@ img {
 /* ===================== HEADINGS ===================== */
 
 h3 {
-    margin: 4px 0 12px;
+    margin: 4px 8px 12px;
 
     color: var(--text-secondary);
     font-size: 13px;
@@ -348,6 +350,7 @@ h4 {
 /* Favorite link content */
 
 .link--item--a {
+    grid-column: 2;
     display: flex;
     flex-direction: column;
     gap: 3px;
@@ -388,7 +391,7 @@ h4 {
 .fabricItem--history,
 .workspace--save,
 .fabricItem--save,
-.button--refresh--history {
+.button--refresh--history{
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -440,9 +443,10 @@ h4 {
 .fabricItem--history img,
 .workspace--save img,
 .fabricItem--save img,
-.button--refresh--history img {
-    width: 16px;
-    height: 16px;
+.button--refresh--history img ,
+.run--action-bar img{
+    width: 18px;
+    height: 18px;
 }
 
 .history-icon,
@@ -526,7 +530,7 @@ input[type="text"]:focus {
     box-shadow: 0 5px 15px rgba(8, 47, 41, 0.08);
 }
 
-.fabricWs {
+.fabricWs, .fabricItem {
     padding: 10px 12px;
 
     color: var(--text);
@@ -540,7 +544,7 @@ input[type="text"]:focus {
         background var(--transition);
 }
 
-.fabricWs:hover {
+.fabricWs:hover, .fabricItem:hover {
     color: var(--accent-hover);
     background: var(--accent-soft);
 }
@@ -615,10 +619,14 @@ input[type="text"]:focus {
    [item ID                     ]
 */
 
+.hidden {
+    display: none !important;
+}
+
 .workspace--container,
 .fabricItem--container {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 36px 36px;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: 4px 6px;
 
@@ -692,24 +700,13 @@ input[type="text"]:focus {
     grid-row: 1;
 }
 
-/* Item actions: star, history, link */
-
-.fabricItem--container > .fabricItem--save {
-    grid-column: 2;
-    grid-row: 1;
-}
-
-.fabricItem--container > .fabricItem--history {
-    grid-column: 3;
-    grid-row: 1;
-}
 
 /* The item link is moved to a new row on narrow grids by default.
    On wider panels, the following layout accommodates all actions. */
-
+/* 
 .fabricItem--container {
     grid-template-columns: minmax(0, 1fr) 34px 34px 34px;
-}
+} */
 
 .fabricItem--container > .fabricItem--save {
     grid-column: 2;
@@ -754,7 +751,19 @@ input[type="text"]:focus {
 
 /* ===================== RUN HISTORY ===================== */
 
+.history-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.button--refresh--history {
+    padding: 0;
+}
+
 .run-history-container {
+    display: flex;
+    flex-direction: column;
     grid-column: 1 / -1;
     grid-row: auto;
 
@@ -766,7 +775,7 @@ input[type="text"]:focus {
 }
 
 .run-history-container > .button--refresh--history {
-    float: right;
+    /* float: right; */
     margin-top: -5px;
 }
 
@@ -776,7 +785,9 @@ input[type="text"]:focus {
 }
 
 .history--title {
-    margin: 0 0 10px;
+    margin-left: 10px;
+    justify-self: center;
+    align-self: center;
 
     color: var(--text-secondary);
     font-size: 12px;
@@ -828,6 +839,22 @@ input[type="text"]:focus {
     flex-shrink: 0;
 }
 
+.run--action-bar button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 7px;
+
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 50%;
+
+    cursor: pointer;
+    margin-left: 0px;
+}
+
 .run--action-bar {
     display: flex;
     align-items: center;
@@ -852,6 +879,10 @@ input[type="text"]:focus {
     background: var(--accent-soft);
 }
 
+.run--action-bar button:hover {
+    background: var(--error-soft);
+}
+
 .run-time {
     margin-top: 8px;
 
@@ -869,6 +900,29 @@ input[type="text"]:focus {
     font-size: 10px;
 }
 
+
+.failure {
+    border-color: var(--border-strong);
+    background: var(--failure-box);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    width: 100%;      
+    box-sizing: border-box;
+
+    max-height: 100px;
+    overflow-y: auto;
+
+    padding: 5px 10px 10px;
+    font-size: 11px;
+
+    overflow-wrap: break-word;
+    word-break: break-word;
+
+    margin: 5px auto;
+}
+
+
 /* ===================== UTILITIES ===================== */
 
 .other--tools {
@@ -883,7 +937,7 @@ input[type="text"]:focus {
 
 * {
     scrollbar-width: thin;
-    scrollbar-color: #a9c9ba transparent;
+    scrollbar-color: #32644d transparent;
 }
 
 *::-webkit-scrollbar {
@@ -903,6 +957,9 @@ input[type="text"]:focus {
 *::-webkit-scrollbar-thumb:hover {
     background: #78ab95;
 }
+
+
+
 
 /* ===================== NARROW PANELS ===================== */
 

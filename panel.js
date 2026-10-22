@@ -309,11 +309,13 @@ itemInfoContainer.addEventListener("click", async (e) => {
 
         if (!isRefresh) {
             if (existingHistory) {
-                existingHistory.hidden = !existingHistory.hidden;
+                // existingHistory.hidden = !existingHistory.hidden;
+                existingHistory.classList.toggle("hidden");
                 return;
             }
             if (noHistoryFound) {
-                noHistoryFound.hidden = !noHistoryFound.hidden;
+                // noHistoryFound.hidden = !noHistoryFound.hidden;
+                noHistoryFound.classList.toggle("hidden");
                 return;
             }
         }
@@ -379,6 +381,7 @@ favContainer.addEventListener("click", async (e) => {
         }
         case e.target.classList.contains("history-icon"): {
             e.preventDefault();
+            console.log("click", e.target)
             const itemContainer = e.target.closest(".link--item--div");
             await showFavItemHistoryRuns(itemContainer, token);
             break;

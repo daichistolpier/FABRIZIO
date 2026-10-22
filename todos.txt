@@ -1,0 +1,24 @@
+// refresh history semantic --> OK
+// toggle favourites --> done --> to style
+// toggle to be saved in cache
+// toogle "others (json beautifier, get connection info)"
+// star filled in --> ok
+// chips button --> ok
+// refresh di history on button (add refresh button) --> ok
+// hover on name gives full name --> ok (on favorites)
+// scroll bar for favorites (search bar?)
+
+// from link get the workspace name and itemname --> OK (remove rename??)
+// below button --> copy below
+// star and go to on same line
+// tab manager?
+// favorite organizers
+
+// fix         const wsObj = workspaces.find(item => item.id === wsId);
+// bug right click
+
+// bug: when clicking item then cancel
+
+// add type to favortype as tag
+// chips default all
+// history show date in -> if differennt from previous one
