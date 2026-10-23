@@ -13,6 +13,7 @@ DONE
 
 -------------------------------
 TO DO
+// get connection shall not return invalid josn and not append new result
 // toggle to be saved in cache
 // toogle "others (json beautifier, get connection info)"
 // tab manager?
@@ -20,3 +21,5 @@ TO DO
 // history show date in -> if differennt from previous one
 // rapid ws item clicker
 // add info on capacity
+// arrows to naviaget items???
+// order

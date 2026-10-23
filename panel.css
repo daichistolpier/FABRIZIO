@@ -283,6 +283,7 @@ img {
     background: var(--panel-soft);
 }
 
+
 .panel-section > summary:active {
     background: var(--accent-soft);
 }
@@ -1158,11 +1159,12 @@ input[type="text"]:focus {
         height: 28px;
     }
 
-.link--item--div {
+    .link--item--div {
         grid-template-columns: 24px minmax(0, 1fr) 27px 27px;
         gap: 3px;
         padding: 7px;
     }
+    
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -287,7 +287,10 @@ export function renderFavLinks(whereToRender, favoriteLinksList){
     const favLinkList = document.createElement("div");
     favLinkList.classList.add("favLinkList");
 
-    favoriteLinksList.forEach(favLink =>{
+
+    favoriteLinksList
+    .sort((a, b) => a.displayName.localeCompare(b.displayName))
+    .forEach(favLink =>{
         const linkItemDiv = document.createElement("div");
         const linkItemAnch = document.createElement("a");
         linkItemAnch.href = favLink.url;
