@@ -122,7 +122,7 @@ export function renderFiltWsAndItems(listToRender, whereToRender, itemClassName 
     )
 }
 
-export function filterWsAndItems(listToFilter, inputForm, filteredItemsContainer, itemClassName,  currentTypeFilter, typeFilter = false ) {
+export function filterWsAndItems(listToFilter, inputForm, filteredItemsContainer, itemClassName,  currentTypeFilter, chipsContainer = false, typeFilter = false ) {
     // click filter button
     let items = [...listToFilter];
 
@@ -136,15 +136,19 @@ export function filterWsAndItems(listToFilter, inputForm, filteredItemsContainer
             item.id.toLowerCase()?.includes(searchInput?.toLowerCase())
         }
     )
+    if (chipsContainer) renderTypeFilters(chipsContainer, items, currentTypeFilter);
 
     //type filter
     if (typeFilter && currentTypeFilter !== "All") {
         items = items.filter(item =>
             item.type === currentTypeFilter
         );
+        // console.log("items", items)
+        // renderTypeFilters(chipsContainer, items, currentTypeFilter);
     }
 
     renderFiltWsAndItems(items, filteredItemsContainer, itemClassName);
+    
 
 }
 
@@ -163,9 +167,12 @@ export function renderClickedObject(fabricObjectType, item, whereToRender, favLi
     const IdDiv = document.createElement("div");
     IdDiv.textContent = item.id;
 
-    
+    let itemTypeDiv = document.createElement("div");
+    itemTypeDiv.classList.add("item-type");
+
     if (fabricObjectType === "workspace") {
         itemContainer.dataset.objectType = "workspace";
+        itemTypeDiv.textContent = "Workspace";
         itemContainer.dataset.objectId = item.id;
 
         const fullFabricUrl = `${baseFabricUrl}/${item.id}?experience=fabric-developer`;
@@ -173,6 +180,7 @@ export function renderClickedObject(fabricObjectType, item, whereToRender, favLi
     }
     else if (fabricObjectType === "fabricItem"){
         itemContainer.dataset.objectType = item.type;
+        itemTypeDiv.textContent = item.type;
         itemContainer.dataset.objectId = item.id;
         itemContainer.dataset.wsId = item.workspaceId;
 
@@ -193,6 +201,7 @@ export function renderClickedObject(fabricObjectType, item, whereToRender, favLi
     if (favStarIcon) {itemContainer.append(favStarIcon);}
     if (historyButton) {itemContainer.append(historyButton);}
     if (goToAnchor) {itemContainer.append(goToAnchor);}
+    itemContainer.append(itemTypeDiv);
     itemContainer.append(IdDiv);
 
     whereToRender.innerHTML = "" 
@@ -291,16 +300,26 @@ export function renderFavLinks(whereToRender, favoriteLinksList){
 
         linkItemAnch.append(itemNameDiv);
 
+        let itemTypeDiv = document.createElement("div");
+        itemTypeDiv.classList.add("item-type");
+
         // show history
         if (favLink.type === "DataPipeline" || favLink.type === 'SemanticModel'){
             const historyButton = createHistoryIcon();
             linkItemDiv.append(historyButton);
         }
 
+        if (favLink.type === "workspace") {
+            itemTypeDiv.textContent = "Workspace";
+        }
+        else {
+            itemTypeDiv.textContent = favLink.type;
+        }
+
         const removeLinkButton = createRemoveButton()
         const renameLinkName = createRenameButton()
 
-
+        linkItemAnch.append(itemTypeDiv);
         // CREATE LINK ANCHOR
         linkItemAnch.classList.add("link--item--a");
         linkItemAnch.target = "_blank";
@@ -328,7 +347,8 @@ export function renderFavLinks(whereToRender, favoriteLinksList){
     whereToRender.append(favLinkList);
 }
 
-export function renderTypeFilters(itemTypeFilters, items) {
+export function renderTypeFilters(itemTypeFilters, items, selectedTypeFilter) {
+    console.log("rendeing chips")
     
     itemTypeFilters.innerHTML = '';
 
@@ -339,6 +359,10 @@ export function renderTypeFilters(itemTypeFilters, items) {
     const buttonALL = document.createElement("button");
     buttonALL.textContent = "All";
     buttonALL.dataset.type = "All";
+    if (selectedTypeFilter === "All"){
+        buttonALL.classList.toggle("active");
+    }
+    // buttonALL.classList.toggle("active");
     itemTypeFilters.appendChild(buttonALL);
 
     [...typeSet]
@@ -348,7 +372,11 @@ export function renderTypeFilters(itemTypeFilters, items) {
             buttonType.textContent = type;
             buttonType.dataset.type = type;
             itemTypeFilters.appendChild(buttonType);
+            if (type === selectedTypeFilter){
+                buttonType.classList.toggle("active");
+            }
         });
+    
 }
 
 
@@ -367,9 +395,7 @@ function createHistoryIcon() {
 export async function showFavItemHistoryRuns(itemContainer, token) {
     const existingHistory =
         itemContainer.querySelector(".run-history-container");
-        console.log("existingHistory", existingHistory)
     
-        console.log("before", existingHistory?.hidden);
 
     if (existingHistory) {
         // existingHistory.hidden = !existingHistory.hidden;
@@ -457,10 +483,14 @@ export function renderLatestRuns (jobInstJson, workspaceId, itemId, objectType) 
 
     runContainer.append(runHeaderDiv)
 
+    const runHistoryList = document.createElement("div");
+    runHistoryList.classList.add("run-history-list");
+
     latestRuns.forEach(run => {
         const runItem = renderSingleRun(run, objectType, workspaceId, itemId);
-        runContainer.append(runItem);
+        runHistoryList.append(runItem);
     })
+    runContainer.append(runHistoryList)
     return runContainer;
 }
 
@@ -651,4 +681,115 @@ export async function saveNewLinkName(input, linkUrl, favoriteLinks) {
         fabrizioFavLinks: favoriteLinks
     })
 
+}
+
+export function renderNoFav(favContainer){
+    const noFavDiv = document.createElement("div");
+    noFavDiv.classList.add("no-favorites");
+    noFavDiv.textContent = "You don't have any favorites yet. Click the star icon to save items here..."
+    favContainer.append(noFavDiv);
+}
+
+
+// export function renderConnectionInfo(jsonMessage, getConnectionInfoDiv) {
+//     const connectionResponseDiv = document.createElement("div");
+//     connectionResponseDiv.textContent = JSON.stringify(jsonMessage);
+//     getConnectionInfoDiv.appendChild(connectionResponseDiv);
+// }
+
+
+
+function createJsonTree(obj) {
+    const container = document.createElement("div");
+    container.classList.add("json-tree");
+
+    for (const [key, value] of Object.entries(obj)) {
+
+        // Arrays
+        if (Array.isArray(value)) {
+            const details = document.createElement("details");
+            details.open = true;
+
+            const summary = document.createElement("summary");
+            summary.textContent = `${key} [${value.length}]`;
+
+            details.appendChild(summary);
+
+            value.forEach((item, index) => {
+                if (item && typeof item === "object") {
+                    const itemDetails = document.createElement("details");
+                    itemDetails.open = true;
+
+                    const itemSummary = document.createElement("summary");
+                    itemSummary.textContent = `[${index}]`;
+
+                    itemDetails.appendChild(itemSummary);
+                    itemDetails.appendChild(createJsonTree(item));
+
+                    details.appendChild(itemDetails);
+                } else {
+                    const row = document.createElement("div");
+                    row.classList.add("json-row");
+
+                    row.innerHTML = `
+                        <span class="json-key">[${index}]</span>
+                        <span class="json-value">${item}</span>
+                    `;
+
+                    details.appendChild(row);
+                }
+            });
+
+            container.appendChild(details);
+        }
+
+        // Objects
+        else if (value && typeof value === "object") {
+            const details = document.createElement("details");
+            details.open = true;
+
+            const summary = document.createElement("summary");
+            summary.textContent = key;
+
+            details.appendChild(summary);
+            details.appendChild(createJsonTree(value));
+
+            container.appendChild(details);
+        }
+
+        // Primitive values
+        else {
+            const row = document.createElement("div");
+            row.classList.add("json-row");
+
+            row.innerHTML = `
+                <span class="json-key">${key}:</span>
+                <span class="json-value">${value}</span>
+            `;
+
+            container.appendChild(row);
+        }
+    }
+
+    return container;
+}
+
+// b814ea87-0d04-4186-95b9-201efde32eca
+export function renderConnectionInfo(jsonMessage, getConnectionInfoDiv) {
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("json-viewer");
+
+    try {
+        const parsed =
+            typeof jsonMessage === "string"
+                ? JSON.parse(jsonMessage)
+                : jsonMessage;
+
+        wrapper.appendChild(createJsonTree(parsed));
+    }
+    catch {
+        wrapper.textContent = "Invalid JSON";
+    }
+
+    getConnectionInfoDiv.appendChild(wrapper);
 }

@@ -14,6 +14,8 @@
     --panel-mint: #edf7f3;
     --panel-hover: #e8f4ee;
 
+    --history-hover: #b8d3c3;
+
     --failure-box : #c7c7c7;
 
     --accent: #168363;
@@ -127,7 +129,7 @@ img {
 
     margin: -14px -14px 0;
     padding: 25px 14px 27px;
-    min-height: 235px;
+    min-height: 100px;
 
     overflow: hidden;
 
@@ -289,11 +291,69 @@ img {
     border-bottom: 1px solid var(--border);
 }
 
+.favorites {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
 .favorites,
 .global--search,
 .other--tools {
     padding: 14px;
     background: var(--panel);
+}
+
+
+/* ===================== UTILITIES PANELS ===================== */
+
+.panel-getConnectionInfo,
+.panel-json-beautifier {
+    margin: 12px;
+    overflow: hidden;
+
+    background: var(--panel-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.panel-getConnectionInfo > summary,
+.panel-json-beautifier > summary {
+    padding: 12px 14px;
+
+    background: var(--panel-mint);
+
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+    list-style: none;
+
+    border-bottom: 1px solid transparent;
+
+    transition:
+        background var(--transition),
+        border-color var(--transition);
+}
+
+.panel-getConnectionInfo > summary::-webkit-details-marker,
+.panel-json-beautifier > summary::-webkit-details-marker {
+    display: none;
+}
+
+.panel-getConnectionInfo[open] > summary,
+.panel-json-beautifier[open] > summary {
+    border-bottom-color: var(--border);
+}
+
+.panel-getConnectionInfo > summary:hover,
+.panel-json-beautifier > summary:hover {
+    background: #e4f2ec;
+}
+
+.connection-info,
+.json-beautifier {
+    padding: 14px;
 }
 
 /* ===================== HEADINGS ===================== */
@@ -370,7 +430,7 @@ h4 {
     white-space: nowrap;
 }
 
-.fav--ws-name {
+.fav--ws-name, .link--item--div .item-type{
     overflow: hidden;
 
     color: var(--text-muted);
@@ -436,6 +496,13 @@ h4 {
 .workspace--save:active,
 .fabricItem--save:active {
     transform: scale(0.94);
+}
+
+.fabricItem--history.active,
+.fabricItem--history:active {
+    color: #fff;
+    background: var(--history-hover);
+    border-color: var(--history-hover);
 }
 
 .button--rename--link img,
@@ -532,6 +599,7 @@ input[type="text"]:focus {
 
 .fabricItem {
     display: flex;
+    align-items: center;
     gap : 20px;
 }
 
@@ -541,7 +609,11 @@ input[type="text"]:focus {
     border-radius: var(--radius-md);
     background: var(--panel-mint);
     box-shadow: 0 5px 15px rgba(8, 47, 41, 0.08);
+    margin-left: auto;
+    flex-shrink: 0;
 }
+
+
 
 .fabricWs, .fabricItem {
     padding: 10px 12px;
@@ -688,7 +760,7 @@ input[type="text"]:focus {
 .workspace--container > div:not(.run-history-container),
 .fabricItem--container > div:not(.run-history-container) {
     grid-column: 1 / -1;
-    grid-row: 2;
+    /* grid-row: 2; */
 
     min-width: 0;
     margin-top: 2px;
@@ -700,7 +772,10 @@ input[type="text"]:focus {
     overflow-wrap: anywhere;
     word-break: break-word;
 }
+/* .workspace--container .item-type,
+.fabricItem--container .item-type {
 
+} */
 /* Workspace actions */
 
 .workspace--container > .workspace--save {
@@ -785,6 +860,14 @@ input[type="text"]:focus {
     padding-top: 12px;
 
     border-top: 1px solid var(--border);
+
+    /* overflow-y: auto;
+    max-height: 300px; */
+}
+
+.run-history-list {
+    overflow-y: auto;
+    max-height: 300px;
 }
 
 .run-history-container > .button--refresh--history {
@@ -946,6 +1029,52 @@ input[type="text"]:focus {
     margin-bottom: 4px;
 }
 
+.json-viewer {
+    margin-top: 10px;
+    padding: 12px;
+
+    background: var(--panel-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+
+    font-size: 12px;
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 400px;
+}
+
+.json-viewer details {
+    margin-left: 12px;
+}
+
+.json-viewer summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--accent);
+    padding: 2px 0;
+}
+
+.json-row {
+    display: flex;
+    gap: 10px;
+    padding: 2px 0;
+    margin-left: 16px;
+    overflow-wrap: anywhere;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
+.json-key {
+    color: var(--text-secondary);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.json-value {
+    color: var(--text);
+    /* word-break: break-word; */
+}
+
 /* ===================== SCROLLBARS ===================== */
 
 * {
@@ -1029,7 +1158,7 @@ input[type="text"]:focus {
         height: 28px;
     }
 
-    .link--item--div {
+.link--item--div {
         grid-template-columns: 24px minmax(0, 1fr) 27px 27px;
         gap: 3px;
         padding: 7px;

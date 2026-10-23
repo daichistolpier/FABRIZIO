@@ -16,7 +16,7 @@
 
 <body>
     <div class="title-wrapper">
-        <img src="img/logo.png" class="logo"  />
+        <!-- <img src="img/logo.png" class="logo"  /> -->
         <!-- <h1>FABRIZIO</h1> -->
     </div>
 
@@ -53,14 +53,25 @@
 
     <details class="panel-section">
         <summary>Utilites</summary>
-        <div class="other--tools">
-            <form class="getConnectionInfo">
-                <h3>Get Connection Info</h2>
-                    <input type="text" placeholder="connection id..." class="input--getConnectionInfo">
+        <details class="panel-getConnectionInfo">
+            <summary>Get Connection Infos</summary>
+            <div class="connection-info">
+                <form class="getConnectionInfo">
+                    <h3>Get Connection Info</h2>
+                        <input type="text" placeholder="connection id..." class="input--getConnectionInfo">
 
-            </form>
-
-        </div>
+                </form>
+            </div>
+        </details>
+        <details class="panel-json-beautifier">
+            <summary>Json Beautifier</summary>
+            <div class="jsonbeautifier">
+                <form class="jsonBeautifier--form">
+                    <h3>Json Beautifier</h2>
+                        <input type="text" placeholder="paste your json..." class="input--jsonBeautifier">
+                </form>
+            </div>
+        </details>
     </details>
 </body>
 

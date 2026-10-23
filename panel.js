@@ -23,7 +23,10 @@ import {
     hideWsDropdown,
     showWsDropdown,
     hideTypeFilters,
-    showTypeFilters
+    showTypeFilters,
+    jsonBeautifierInput,
+    jsonbeautifierDiv,
+    jsonbeautifierForm
 } from "./selectors.js";
 
 import {
@@ -35,7 +38,9 @@ import {
     renderFavLinks,
     renderTypeFilters,
     renderLatestRuns,
-    showFavItemHistoryRuns
+    showFavItemHistoryRuns,
+    renderNoFav,
+    renderConnectionInfo
 } from "./panelRendering.js"
 
 // GET TOKEN
@@ -70,6 +75,9 @@ hideItemDropdown();
 // INIT FAVORITE
 if (favoriteLinks && favoriteLinks?.length) {
     renderFavLinks(favContainer, favoriteLinks);
+}
+else {
+    renderNoFav(favContainer)
 }
 
 //// INIT WS
@@ -210,15 +218,20 @@ itemFormInput.addEventListener("focus", async () => {
         );
     }
     // render type filters
-    renderTypeFilters(itemTypeFilters, allItems);
-    filterWsAndItems(allItems, itemFormInput, itemFoundContainer, "fabricItem", selectedTypeFilter,  true);
+    renderTypeFilters(itemTypeFilters, allItems, selectedTypeFilter);
+
+    // render filtered objects
+    // console.log("allItems", allItems, "selectedTypeFilter", selectedTypeFilter)
+    filterWsAndItems(allItems, itemFormInput, itemFoundContainer, "fabricItem", selectedTypeFilter,  itemTypeFilters, true);
     showItemDropdown();
     showTypeFilters();
+
 });
 
 // FILTER BY TYPING
 itemFormInput.addEventListener("input", () => {
-    filterWsAndItems(allItems, itemFormInput, itemFoundContainer, "fabricItem", selectedTypeFilter,  true);
+    filterWsAndItems(allItems, itemFormInput, itemFoundContainer, "fabricItem", selectedTypeFilter,  itemTypeFilters, true);
+    // renderTypeFilters(itemTypeFilters, allItems, selectedTypeFilter);
 
 });
 
@@ -233,7 +246,7 @@ itemTypeFilters.addEventListener("click", e => {
 
     button.classList.add("active");
     selectedTypeFilter = e.target.dataset.type;
-    filterWsAndItems(allItems, itemFormInput, itemFoundContainer, "fabricItem", selectedTypeFilter, true);
+    filterWsAndItems(allItems, itemFormInput, itemFoundContainer, "fabricItem", selectedTypeFilter, itemTypeFilters, true);
 });
 
 // CLICK ON FOUND ITEMS TO GET INFO
@@ -246,18 +259,19 @@ itemFoundContainer.addEventListener("click", async e =>{
 
     const itemInfo = allItems.find(item => item.displayName === name && item.type === type )
 
-    selectedTypeFilter = itemInfo;
 
     await browser.storage.local.set({
         fabrizioGlobalSearch: {
             workspace: selectedWs,
-            items: selectedTypeFilter
+            items: itemInfo
         }
     }); 
 
     renderClickedObject("fabricItem", itemInfo, itemInfoContainer, favoriteLinks)
 
-    itemFormInput.value = name;
+    itemFormInput.value = '';
+    selectedTypeFilter = "All";
+    // itemFormInput.value = name;
     hideItemDropdown();
 
 
@@ -302,6 +316,9 @@ itemInfoContainer.addEventListener("click", async (e) => {
         ||
         e.target.closest("button")?.classList.contains("button--refresh--history")) {
         e.preventDefault();
+
+        const button = e.target.closest("button");
+        button.classList.toggle("active");
 
         const existingHistory = itemInfoContainer.querySelector(".run-history-container");
         const noHistoryFound = itemInfoContainer.querySelector(".no--history--found");
@@ -383,10 +400,12 @@ favContainer.addEventListener("click", async (e) => {
             await renameFavLink(e,favoriteLinks, favContainer )
             break;
         }
-        case e.target.classList.contains("history-icon"): {
+        case e.target.closest("button")?.classList.contains("fabricItem--history"): {
             e.preventDefault();
             console.log("click", e.target)
             const itemContainer = e.target.closest(".link--item--div");
+            const button = e.target.closest("button");
+            button.classList.toggle("active");
             await showFavItemHistoryRuns(itemContainer, token);
             break;
         }
@@ -449,11 +468,11 @@ getConnectionInfoDiv.addEventListener("submit", async (e) =>{
         inputGetConnectionInfo.value = '';
         return;
     }
+
     const jsonMessage = await getConnectionInfo(inputValue, token);
 
-    const connectionResponseDiv = document.createElement("div");
-    connectionResponseDiv.textContent = JSON.stringify(jsonMessage);
-    getConnectionInfoDiv.appendChild(connectionResponseDiv);
+    renderConnectionInfo(jsonMessage, getConnectionInfoDiv)
+
     inputGetConnectionInfo.value = '';
 })
 
@@ -477,4 +496,26 @@ document.addEventListener("mousedown", (e) => {
     if (!insideItemSearch) {
         hideItemDropdown();
     }
+});
+
+
+// JSON beautifier
+jsonbeautifierForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const input = jsonBeautifierInput.value.trim();
+
+    let jsonBeautifierOutput =
+        document.querySelector(".jsonBeautifier--output");
+
+    if (!jsonBeautifierOutput) {
+        jsonBeautifierOutput = document.createElement("div");
+        jsonBeautifierOutput.classList.add("jsonBeautifier--output");
+
+        jsonbeautifierDiv.appendChild(jsonBeautifierOutput);
+    }
+
+    jsonBeautifierOutput.innerHTML = "";
+
+    renderConnectionInfo(input, jsonBeautifierOutput);
 });

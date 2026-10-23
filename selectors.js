@@ -18,6 +18,12 @@ export const itemTypeFilters = document.querySelector(".item-type-filters");
 //favorites selector
 export const favContainer = document.querySelector(".favorites")
 
+//json beautifier
+export const jsonBeautifierInput = document.querySelector(".input--jsonBeautifier");
+export const jsonbeautifierDiv = document.querySelector(".jsonbeautifier");
+export const jsonbeautifierForm = document.querySelector(".jsonBeautifier--form");
+
+
 
 export function hideItemDropdown() {
     itemFoundContainer.style.display = "none";
