@@ -16,7 +16,7 @@
 
 <body>
     <div class="title-wrapper">
-        <img src="img/logo.png" class="logo"  />
+        <img src="img/logo.png" class="logo" />
         <!-- <h1>FABRIZIO</h1> -->
     </div>
 
@@ -74,18 +74,20 @@
             <div class="connection-info-div">
                 <form class="getConnectionInfo">
                     <!-- <h3>Get Connection Info</h2> -->
-                        <input type="text" placeholder="connection id..." class="input--getConnectionInfo">
+                    <input type="text" placeholder="connection id..." class="input--getConnectionInfo">
 
                 </form>
             </div>
         </details>
-       <details class="panel-json-beautifier" open="">
+        <details class="panel-json-beautifier" open="">
             <summary>Json Beautifier</summary>
             <div class="json-beautifier-div">
                 <form class="jsonBeautifier">
-                    <!-- <h3>Get Connection Info</h2> -->
-                        <input type="text" placeholder="paste your json..." class="input--jsonbeautifier">
+                    <textarea placeholder="Paste your JSON..." class="input--jsonbeautifier" rows="4"></textarea>
 
+                    <button type="submit" class="button--beautify-json">
+                        Beautify JSON
+                    </button>
                 </form>
             </div>
         </details>

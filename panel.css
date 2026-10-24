@@ -85,6 +85,37 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+body {
+    position: relative;
+    isolation: isolate;
+}
+
+body::before,
+body::after {
+    content: "";
+    position: fixed;
+    left: -20%;
+    width: 140%;
+    height: 280px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+body::before {
+    top: 35%;
+    transform: rotate(-10deg);
+    background: rgba(22, 131, 99, 0.08);
+    box-shadow: 0 -18px 0 rgba(22, 167, 123, 0.035);
+}
+
+body::after {
+    top: 55%;
+    transform: rotate(8deg);
+    background: rgba(8, 47, 41, 0.22);
+    box-shadow: 0 -20px 0 rgba(22, 131, 99, 0.05);
+}
+
 button,
 input {
     font: inherit;
@@ -119,6 +150,47 @@ img {
     object-fit: contain;
 }
 
+
+.button--beautify-json {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px 14px;
+
+    color: #fff;
+    background: var(--bg-mid);
+    border: 1px solid var(--bg-mid);
+    border-radius: var(--radius-md);
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 650;
+
+    cursor: pointer;
+
+    transition:
+        background var(--transition),
+        border-color var(--transition),
+        transform var(--transition);
+}
+
+.button--beautify-json:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.button--beautify-json:active {
+    transform: scale(0.98);
+}
+
+.button--beautify-json:focus-visible {
+    outline: 2px solid var(--bg-mid);
+    outline-offset: 3px;
+}
 /* ===================== BRAND HEADER ===================== */
 
 .title-wrapper {
@@ -186,8 +258,8 @@ img {
     z-index: 1;
 
     display: block;
-    width: 205px;
-    max-width: 90%;
+    width: 160px;
+    max-width: 70%;
     height: auto;
 
     object-fit: contain;
@@ -293,7 +365,7 @@ img {
 }
 
 .favorites {
-    max-height: 300px;
+    max-height: 600px;
     overflow-y: auto;
 }
 
@@ -427,6 +499,39 @@ h4 {
     margin-left: 10px;
 }
 
+.rename-input {
+    width: 100%;
+    min-width: 0;
+    height: 30px;
+    padding: 4px 9px;
+    margin-top: 0;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+
+    background: var(--panel-soft);
+    border: 1px solid var(--border-strong);
+    border-radius: 7px;
+
+    outline: none;
+    box-shadow: none;
+
+    transition:
+        background var(--transition),
+        border-color var(--transition),
+        box-shadow var(--transition);
+}
+
+.rename-input,
+.rename-input:focus,
+.rename-input:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: var(--border-strong);
+}
+
 .fav--item-name {
     overflow: hidden;
 
@@ -467,7 +572,8 @@ h4 {
 .fabricItem--history,
 .workspace--save,
 .fabricItem--save,
-.button--refresh--histor{
+.button--refresh--histor,
+.button--refresh--history{
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -495,7 +601,7 @@ h4 {
 
 .button--rename--link:hover,
 .fabricItem--history:hover,
-.button--refresh--history:hover {
+.button--refresh--history:hover{
     background: var(--accent-soft);
     border-color: var(--accent-border);
 }
@@ -556,6 +662,7 @@ h4 {
 .fabricItem--container a,
 .button--rename--link,
 .button--remove--link,
+.button--refresh--history,
 .status a {
     position: relative;
 }
@@ -567,7 +674,8 @@ h4 {
 .fabricItem--save:hover::after,
 .fabricItem--container a:hover::after,
 .button--rename--link:hover::after,
-.button--remove--link:hover::after {
+.button--remove--link:hover::after,
+.button--refresh--history:hover::after {
     position: absolute;
     bottom: calc(100% + 8px);
     left: 50%;
@@ -607,6 +715,10 @@ h4 {
     content: "Remove";
 }
 
+
+.button--refresh--history:hover::after {
+    content: "Refresh";
+}
 
 .status a:hover::after {
     content: "Go to run";
@@ -700,6 +812,33 @@ input[type="text"]:focus {
     width: 100%;
     padding-left: 43px;
 }
+
+
+.input--jsonbeautifier {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 80px;
+    max-height: 400px;
+    padding: 10px 13px;
+
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text);
+
+    background: var(--panel-soft);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+
+    resize: vertical;
+    overflow: auto;
+    outline: none;
+
+    transition:
+        background var(--transition),
+        border-color var(--transition);
+}
+
 
 /* ===================== SEARCH SUGGESTIONS ===================== */
 
@@ -1130,11 +1269,14 @@ input[type="text"]:focus {
     border: 1px solid var(--border);
     border-radius: 10px;
 
-    width: 100%;      
+    width: 100%;
     box-sizing: border-box;
 
     max-height: 100px;
-    overflow-y: auto;
+    min-height: 40px;
+    overflow: auto;
+
+    resize: vertical;
 
     padding: 5px 10px 10px;
     font-size: 11px;
@@ -1152,54 +1294,149 @@ input[type="text"]:focus {
     padding-bottom: 15px;
 }
 
-/* .getConnectionInfo input , .jsonBeautifier--form .input--jsonBeautifier{
-    margin-bottom: 4px;
-} */
+
+
+/* ===================== JSON VIEWER ===================== */
 
 .json-viewer {
-    margin-top: 10px;
+    margin-top: 12px;
     padding: 12px;
 
-    background: var(--panel-soft);
+    color: var(--text);
+    background: #fbfdfc;
+
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
 
+    font-family: Consolas, "Cascadia Code", monospace;
     font-size: 12px;
-    overflow-x: auto;
-    overflow-y: auto;
+    line-height: 1.7;
+
     max-height: 400px;
+    overflow: auto;
 }
 
+/* Nested object / array containers */
+.json-viewer .json-tree {
+    margin-left: 8px;
+    padding-left: 10px;
+
+    border-left: 1px solid #dcece5;
+}
+
+/* Expandable object headings */
 .json-viewer details {
-    margin-left: 12px;
+    min-width: 0;
+    margin: 3px 0;
 }
 
+/* Clickable object / array labels */
 .json-viewer summary {
-    cursor: pointer;
-    font-weight: 600;
-    color: var(--accent);
-    padding: 2px 0;
-}
-
-.json-row {
+    position: relative;
     display: flex;
-    gap: 10px;
-    padding: 2px 0;
-    margin-left: 16px;
+    align-items: center;
+    gap: 7px;
+
+    min-width: 0;
+    padding: 4px 7px;
+
+    color: var(--accent-hover);
+    background: #edf7f2;
+
+    border: 1px solid transparent;
+    border-radius: 6px;
+
+    font-family: "Segoe UI", sans-serif;
+    font-size: 12px;
+    font-weight: 650;
+
+    cursor: pointer;
+    list-style: none;
+
+    transition:
+        background var(--transition),
+        border-color var(--transition);
+}
+
+.json-viewer summary::-webkit-details-marker {
+    display: none;
+}
+
+/* Custom disclosure arrow */
+.json-viewer summary::before {
+    content: "";
+    flex-shrink: 0;
+
+    width: 6px;
+    height: 6px;
+
+    border-right: 1.5px solid var(--accent);
+    border-bottom: 1.5px solid var(--accent);
+
+    transform: rotate(-45deg);
+    transition: transform var(--transition);
+}
+
+.json-viewer details[open] > summary::before {
+    transform: rotate(45deg);
+}
+
+.json-viewer summary:hover {
+    background: #e1f3e9;
+    border-color: var(--accent-border);
+}
+
+/* Individual property rows */
+.json-viewer .json-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+
+    min-width: 0;
+    margin: 2px 0;
+    padding: 3px 7px;
+
+    border-radius: 5px;
+
+    white-space: normal;
     overflow-wrap: anywhere;
-    flex-wrap: nowrap;
-    white-space: nowrap;
+    transition: background var(--transition);
 }
 
-.json-key {
-    color: var(--text-secondary);
-    font-weight: 600;
-    white-space: nowrap;
+.json-viewer .json-row:hover {
+    background: #f0f7f3;
 }
 
-.json-value {
-    color: var(--text);
-    /* word-break: break-word; */
+/* Property names */
+.json-viewer .json-key {
+    flex: 0 0 auto;
+    max-width: 45%;
+
+    color: #397a68;
+    font-weight: 650;
+
+    overflow-wrap: anywhere;
+    white-space: normal;
+}
+
+/* Property values */
+.json-viewer .json-value {
+    min-width: 0;
+    color: #263f38;
+
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* Long strings and file paths */
+.json-viewer .json-row .json-value {
+    line-height: 1.6;
+}
+
+/* Keyboard accessibility */
+.json-viewer summary:focus-visible {
+    outline: 2px solid var(--accent-bright);
+    outline-offset: 2px;
 }
 
 /* ===================== SCROLLBARS ===================== */

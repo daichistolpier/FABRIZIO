@@ -10,16 +10,20 @@ DONE
 // add type to favortype as tag--> OK
 // chips default all --> OK
 // fav if empty show now fav --> OK
+// ORDER --> OK
+// refrwsh button to fix --> OK
+// when renaming, no href --> ok
+// expand fail message (and json beautifier input) --> ok
+// history show date in -> if differennt from previous one --> OK
+//// get connection shall not return invalid josn and not append new result --> ok?
+
 
 -------------------------------
 TO DO
-// get connection shall not return invalid josn and not append new result
 // toggle to be saved in cache
 // toogle "others (json beautifier, get connection info)"
 // tab manager?
 // favorite organizers
-// history show date in -> if differennt from previous one
 // rapid ws item clicker
-// add info on capacity
 // arrows to naviaget items???
-// order --> ok
+// when renaming, no href

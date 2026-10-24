@@ -42,6 +42,7 @@ export async function getAllWorkspaces(token) {
 
     const { value } = await allWorkspacesResponse.json();
     return value
+
 }
 
 export async function getWorkspaceIdFromName  (inputValue, allWorkspaces, token) {

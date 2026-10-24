@@ -29,23 +29,24 @@ const fabricRoutes = {
 
 
 export async function removeFavLink(event, favoriteLinks, favContainer) {
-    const button = event.target.closest("button")
-    const linkItemAnchor = button.parentElement.querySelector(".link--item--a")
-    const linkDisplayName = linkItemAnchor.querySelector(".fav--item-name").textContent;
+    const button = event.target.closest("button");
+    const linkItemAnchor =
+        button.parentElement.querySelector(".link--item--a");
+
+    const linkDisplayName =
+        linkItemAnchor.querySelector(".fav--item-name").textContent;
+
     const linkUrl = linkItemAnchor.href;
 
-    favoriteLinks = favoriteLinks.filter(item => {
-        return !(item.displayName === linkDisplayName && item.url === linkUrl);
-    })
+    const updatedLinks = favoriteLinks.filter(item =>
+        !(item.displayName === linkDisplayName && item.url === linkUrl)
+    );
 
-    console.log("favoriteLinks", favoriteLinks)
+    await browser.storage.local.set({
+        fabrizioFavLinks: updatedLinks
+    });
 
-    await browser.storage.local.set({ "fabrizioFavLinks": favoriteLinks });
-
-    if (!favoriteLinks.length) {
-        favContainer.innerHTML = '';
-    }
-    return favoriteLinks;
+    return updatedLinks;
 }
 
 export async function renameFavLink(event, favoriteLinks, favContainer) {
@@ -60,14 +61,22 @@ export async function renameFavLink(event, favoriteLinks, favContainer) {
     const linkDisplayName = linkItemAnchor.querySelector(".fav--item-name").textContent;
     const linkUrl = linkItemAnchor.href;
     const input = document.createElement("input");
+    input.classList.add("rename-input");
     input.value = linkDisplayName;
 
     const itemNameDiv = linkItemAnchor.querySelector(".fav--item-name");
-    
-    
+
+    input.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    });
+
+    input.addEventListener("keydown", (e) => {
+        e.stopPropagation();
+    });
 
     itemNameDiv.replaceWith(input);
-    // linkItemAnchor.replaceWith(input);
+    // linkItemAnchor.appendChild(input);
     input.focus();
     input.select();
 
@@ -154,7 +163,7 @@ export function filterWsAndItems(listToFilter, inputForm, filteredItemsContainer
 
 export function renderClickedObject(fabricObjectType, item, whereToRender, favLinkList) {
     if (!item) return;
-    console.log("item", item)
+    // console.log("item", item)
     let favStarIcon = null;
     let goToAnchor = null;
     let historyButton = null;
@@ -644,11 +653,34 @@ function getRuntimeInfo(run) {
         return `${formatDateTimeHistory(startTime)} → Running`;
     }
 
-    return `${formatDateTimeHistory(startTime)} → ${new Date(endTime)
-        .toLocaleTimeString([], {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    const isDifferentDay = start.toDateString() !== end.toDateString();
+
+    const endFormatted = isDifferentDay
+        ? end.toLocaleString([], {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
             hour: "2-digit",
             minute: "2-digit"
-        })}`;
+        })
+        : end.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+
+    const startFormatted = isDifferentDay
+        ? start.toLocaleString([], {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        })
+        : formatDateTimeHistory(startTime);
+
+    return `${startFormatted} → ${endFormatted}`;
 }
 
 // function getRuntimeInfo(run) {
@@ -687,10 +719,12 @@ export async function saveNewLinkName(input, linkUrl, favoriteLinks) {
 }
 
 export function renderNoFav(favContainer){
+    favContainer.replaceChildren();
     const noFavDiv = document.createElement("div");
     noFavDiv.classList.add("no-favorites");
     noFavDiv.textContent = "You don't have any favorites yet. Click the star icon to save items here..."
-    favContainer.append(noFavDiv);
+    favContainer.appendChild(noFavDiv);
+    console.log("noFavDiv", noFavDiv)
 }
 
 
@@ -779,8 +813,15 @@ function createJsonTree(obj) {
 
 // b814ea87-0d04-4186-95b9-201efde32eca
 export function renderConnectionInfo(jsonMessage, getConnectionInfoDiv) {
-    const wrapper = document.createElement("div");
-    wrapper.classList.add("json-viewer");
+    // getConnectionInfoDiv.replaceChildren();
+
+    let wrapper = document.querySelector(".json-viewer")
+    if (!wrapper) {
+        wrapper = document.createElement("div");
+        wrapper.classList.add("json-viewer");
+    }
+    else wrapper.replaceChildren();
+    
 
     try {
         const parsed =
@@ -791,7 +832,7 @@ export function renderConnectionInfo(jsonMessage, getConnectionInfoDiv) {
         wrapper.appendChild(createJsonTree(parsed));
     }
     catch {
-        wrapper.textContent = "Invalid JSON";
+        wrapper.textContent = jsonMessage;
     }
 
     getConnectionInfoDiv.appendChild(wrapper);

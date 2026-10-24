@@ -444,21 +444,27 @@ favContainer.addEventListener("click", async (e) => {
 
 // CACHE
 
-browser.storage.onChanged.addListener(async (changes, area) => {
+browser.storage.onChanged.addListener((changes, area) => {
     if (area !== "local") return;
 
-    if (changes?.fabrizioFavLinks) {
-        favoriteLinks = changes.fabrizioFavLinks.newValue;
-        renderFavLinks(favContainer, favoriteLinks);
+    if (changes.fabrizioFavLinks) {
+        favoriteLinks = changes.fabrizioFavLinks.newValue ?? [];
+
+        if (favoriteLinks.length === 0) {
+            renderNoFav(favContainer);
+        } else {
+            renderFavLinks(favContainer, favoriteLinks);
+        }
     }
 
-    if (changes?.fabrizioGlobalSearch) {
+    if (changes.fabrizioGlobalSearch) {
         const context = changes.fabrizioGlobalSearch.newValue;
 
-        selectedWs = context?.workspace || null;
-        selectedItems = context?.items || null;
+        selectedWs = context?.workspace ?? null;
+        selectedItems = context?.items ?? null;
     }
 });
+
 
 // GET CONNECTION INFO
 getConnectionInfoDiv.addEventListener("submit", async (e) =>{
@@ -519,3 +525,5 @@ jsonbeautifierForm.addEventListener("submit", (e) => {
 
     renderConnectionInfo(input, jsonBeautifierOutput);
 });
+
+

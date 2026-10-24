@@ -104,7 +104,6 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
         if (!workspaces) workspaces = await getAllWorkspaces(currentToken);
         const wsObj = workspaces.find(item => item.id === wsId);
         wsName = wsObj.displayName;
-        
     }
 
     if(itemId){
@@ -130,12 +129,14 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
             favObject.objectId = itemId;
             favObject.type = itemType;
             favObject.wsName = wsName;
+            favObject.wsId = wsId;
         }
         else{
             favObject.displayName = itemName;
             favObject.objectId = itemId;
             favObject.type = itemType;
             favObject.wsName = wsName;
+            favObject.wsId = wsId;
             favObject.runId = runId
         }
     }
