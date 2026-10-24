@@ -19,9 +19,9 @@ export const itemTypeFilters = document.querySelector(".item-type-filters");
 export const favContainer = document.querySelector(".favorites")
 
 //json beautifier
-export const jsonBeautifierInput = document.querySelector(".input--jsonBeautifier");
-export const jsonbeautifierDiv = document.querySelector(".jsonbeautifier");
-export const jsonbeautifierForm = document.querySelector(".jsonBeautifier--form");
+export const jsonBeautifierInput = document.querySelector(".input--jsonbeautifier");
+export const jsonbeautifierDiv = document.querySelector(".json-beautifier-div");
+export const jsonbeautifierForm = document.querySelector(".jsonBeautifier");
 
 
 

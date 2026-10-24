@@ -300,10 +300,16 @@ img {
 .favorites,
 .global--search,
 .other--tools {
-    padding: 14px;
+    padding: 14px 14px 18px;
     background: var(--panel);
 }
 
+.panel-section > summary .summary-icon {
+    width: 22px;
+    height: 22px;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
 
 /* ===================== UTILITIES PANELS ===================== */
 
@@ -352,8 +358,8 @@ img {
     background: #e4f2ec;
 }
 
-.connection-info,
-.json-beautifier {
+.connection-info-div,
+.json-beautifier-div {
     padding: 14px;
 }
 
@@ -418,6 +424,7 @@ h4 {
 
     min-width: 0;
     padding: 3px;
+    margin-left: 10px;
 }
 
 .fav--item-name {
@@ -429,6 +436,14 @@ h4 {
 
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.link--item--div .item-type {
+    margin-top: 5px;
+}
+
+.item-type {
+    font-style: italic;
 }
 
 .fav--ws-name, .link--item--div .item-type{
@@ -452,7 +467,7 @@ h4 {
 .fabricItem--history,
 .workspace--save,
 .fabricItem--save,
-.button--refresh--history{
+.button--refresh--histor{
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -461,11 +476,16 @@ h4 {
     height: 32px;
     padding: 7px;
 
-    background: transparent;
+    /* background: transparent; */
+    background: #ffff;
     border: 1px solid transparent;
     border-radius: 50%;
 
     cursor: pointer;
+    box-shadow:
+        0 2px 6px rgba(18, 61, 53, 0.08),
+        0 6px 16px rgba(18, 61, 53, 0.10),
+        inset 0 0 0 1px rgba(22, 131, 99, 0.08);
 
     transition:
         background var(--transition),
@@ -519,8 +539,8 @@ h4 {
 
 .history-icon,
 .save--star-icon {
-    width: 17px !important;
-    height: 17px !important;
+    width: 16px !important;
+    height: 16px !important;
 }
 
 .remove--icon {
@@ -528,11 +548,90 @@ h4 {
     height: 14px !important;
 }
 
+/* Positioning */
+.workspace--save,
+.workspace--container a,
+.fabricItem--history,
+.fabricItem--save,
+.fabricItem--container a,
+.button--rename--link,
+.button--remove--link,
+.status a {
+    position: relative;
+}
+
+/* Shared tooltip style */
+.workspace--save:hover::after,
+.workspace--container a:hover::after,
+.fabricItem--history:hover::after,
+.fabricItem--save:hover::after,
+.fabricItem--container a:hover::after,
+.button--rename--link:hover::after,
+.button--remove--link:hover::after {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 9px;
+    border-radius: 6px;
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* Individual tooltip text */
+.fabricItem--history:hover::after {
+    content: "History";
+}
+
+.workspace--save:hover::after,
+.fabricItem--save:hover::after {
+    content: "Save to favorites";
+}
+
+.workspace--container a:hover::after,
+.fabricItem--container a:hover::after{
+    content: "Go to item";
+}
+
+.button--rename--link:hover::after {
+    content: "Rename";
+}
+
+.button--remove--link:hover::after {
+    content: "Remove";
+}
+
+
+.status a:hover::after {
+    content: "Go to run";
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-70%);
+    padding: 5px 9px;
+    border-radius: 6px;
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    z-index: 1000;
+    pointer-events: none;
+}
+
 /* ===================== SEARCH INPUTS ===================== */
 
 .global--ws,
 .global--item,
-.getConnectionInfo {
+.getConnectionInfo,
+.jsonBeautifier--form {
     min-width: 0;
     margin: 0;
 }
@@ -578,6 +677,28 @@ input[type="text"]:focus {
     background: #fff;
     border-color: var(--accent);
     box-shadow: 0 0 0 2px rgba(22, 131, 99, 0.12);
+}
+
+.search-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.search-input-icon {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    width: 20px;
+    height: 20px;
+
+    pointer-events: none;
+}
+
+.search-input-wrapper input {
+    width: 100%;
+    padding-left: 43px;
 }
 
 /* ===================== SEARCH SUGGESTIONS ===================== */
@@ -826,6 +947,11 @@ input[type="text"]:focus {
     border-radius: 50%;
 
     transition: background var(--transition);
+    background-color: #ffff;
+    box-shadow:
+        0 2px 6px rgba(18, 61, 53, 0.08),
+        0 6px 16px rgba(18, 61, 53, 0.10),
+        inset 0 0 0 1px rgba(22, 131, 99, 0.08);
 }
 
 .workspace--container > a:hover,
@@ -834,8 +960,8 @@ input[type="text"]:focus {
 }
 
 .go--to-icon {
-    width: 17px;
-    height: 17px;
+    width: 15px;
+    height: 15px;
 }
 
 /* ===================== RUN HISTORY ===================== */
@@ -868,7 +994,7 @@ input[type="text"]:focus {
 
 .run-history-list {
     overflow-y: auto;
-    max-height: 300px;
+    max-height: 350px;
 }
 
 .run-history-container > .button--refresh--history {
@@ -1026,9 +1152,9 @@ input[type="text"]:focus {
     padding-bottom: 15px;
 }
 
-.getConnectionInfo input {
+/* .getConnectionInfo input , .jsonBeautifier--form .input--jsonBeautifier{
     margin-bottom: 4px;
-}
+} */
 
 .json-viewer {
     margin-top: 10px;

@@ -245,7 +245,7 @@ function createGoToIcon(url){
     // goToAnchor.textContent = "🔗";
 
     const anchorImg = document.createElement("img");
-    anchorImg.src = chrome.runtime.getURL("img/link.png");
+    anchorImg.src = chrome.runtime.getURL("img/go-to.svg");
     anchorImg.alt = "Go To";
     anchorImg.classList.add("go--to-icon");
     goToAnchor.appendChild(anchorImg)
@@ -257,7 +257,7 @@ function createRemoveButton() {
     removeLinkButton.classList.add("button--remove--link")
 
     const removeImg = document.createElement("img");
-    removeImg.src = chrome.runtime.getURL("img/close.png");
+    removeImg.src = chrome.runtime.getURL("img/close.svg");
     removeImg.alt = "remove link";
     removeImg.classList.add("remove--icon");
 
@@ -270,7 +270,7 @@ function createRenameButton() {
     renameLinkName.classList.add("button--rename--link")
 
     const editImg = document.createElement("img");
-    editImg.src = chrome.runtime.getURL("img/pencil.png");
+    editImg.src = chrome.runtime.getURL("img/edit.svg");
     editImg.alt = "Edit link name";
     editImg.classList.add("edit--icon");
 
@@ -386,7 +386,7 @@ export function renderTypeFilters(itemTypeFilters, items, selectedTypeFilter) {
 function createHistoryIcon() {
     const historyButton = document.createElement("button");
     const histImg = document.createElement("img");
-    histImg.src = chrome.runtime.getURL("img/history.png");
+    histImg.src = chrome.runtime.getURL("img/history.svg");
     histImg.alt = "history icon";
     histImg.classList.add("history-icon");
     historyButton.appendChild(histImg)

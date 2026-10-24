@@ -21,18 +21,28 @@
     </div>
 
     <details class="panel-section">
-        <summary>Favorites</summary>
+        <summary>
+            <img src="img/star.svg" alt="" class="summary-icon">
+            <span>Favorites</span>
+        </summary>
         <div class="favorites">
         </div>
     </details>
 
     <details open class="panel-section">
-        <summary>Global search</summary>
+        <summary>
+            <img src="img/lens.svg" alt="" class="summary-icon">
+            <span>Global search</span>
+
+        </summary>
         <div class="global--search">
             <!-- <h3>Global Search</h3> -->
             <form class="global--ws">
                 <h3>Workspace</h3>
-                <input type="text" placeholder="workspace..." class="input--global--ws">
+                <div class="search-input-wrapper">
+                    <img src="img/lens.svg" alt="" class="search-input-icon">
+                    <input type="text" placeholder="workspace..." class="input--global--ws">
+                </div>
                 <div class="global--found-ws"></div>
                 <div class="global--clicked-ws"></div>
                 <!-- <button class="btn--global--wsForm">
@@ -43,7 +53,10 @@
             <form class="global--item item--hidden">
                 <!-- <form class="global--item" style="display: none;"> -->
                 <h3>Item</h3>
-                <input type="text" placeholder="item..." class="input--global--item">
+                <div class="search-input-wrapper">
+                    <img src="img/lens.svg" alt="" class="search-input-icon">
+                    <input type="text" placeholder="item..." class="input--global--item">
+                </div>
                 <div class="item-type-filters"></div>
                 <div class="global--found-item"></div>
                 <div class="global--clicked-item"></div>
@@ -51,24 +64,28 @@
         </div>
     </details>
 
-    <details class="panel-section">
-        <summary>Utilites</summary>
-        <details class="panel-getConnectionInfo">
+    <details class="panel-section" open="">
+        <summary>
+            <img src="img/utilities.svg" alt="" class="summary-icon">
+            <span>Utilites</span>
+        </summary>
+        <details class="panel-getConnectionInfo" open="">
             <summary>Get Connection Info</summary>
-            <div class="connection-info">
+            <div class="connection-info-div">
                 <form class="getConnectionInfo">
-                    <h3>Get Connection Info</h2>
+                    <!-- <h3>Get Connection Info</h2> -->
                         <input type="text" placeholder="connection id..." class="input--getConnectionInfo">
 
                 </form>
             </div>
         </details>
-        <details class="panel-json-beautifier">
+       <details class="panel-json-beautifier" open="">
             <summary>Json Beautifier</summary>
-            <div class="jsonbeautifier">
-                <form class="jsonBeautifier--form">
-                    <h3>Json Beautifier</h2>
-                        <input type="text" placeholder="paste your json..." class="input--jsonBeautifier">
+            <div class="json-beautifier-div">
+                <form class="jsonBeautifier">
+                    <!-- <h3>Get Connection Info</h2> -->
+                        <input type="text" placeholder="paste your json..." class="input--jsonbeautifier">
+
                 </form>
             </div>
         </details>
