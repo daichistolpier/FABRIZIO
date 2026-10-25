@@ -21,26 +21,130 @@ async function getActiveTab() {
 
 }
 
-
-browser.runtime.onMessage.addListener(async message =>{
-    if(message.type != "GET_TOKEN"){
-        return;
+function isFabricTab(url = ""){
+    try {
+        const parsedUrl = new URL(url);
+        return (
+            parsedUrl.protocol === "https:" &&
+            (
+                parsedUrl.hostname === "app.fabric.microsoft.com"
+            )
+        )
+    } catch {
+        return false;
     }
-    const tab = await getActiveTab();
-    // console.log(tab.id)
+}
 
-    // sending message to cs on active tab
-    const responseToken = await browser.tabs.sendMessage(
-        tab.id, {
+
+async function getTokenForTab(tabId, url) {
+    if (!isFabricTab(url)) {
+        return {
+            ok: false,
+            status: "NOT_FABRIC",
+            message: "Open Microsoft Fabric to use Fabrizio."
+        };
+    }
+
+    try {
+        const response = await browser.tabs.sendMessage(tabId, {
             type: "GET_TOKEN"
+        });
+
+        if (!response?.bearer) {
+            return {
+                ok: false,
+                status: "NOT_AUTHENTICATED",
+                message: "Sign in to Microsoft Fabric to continue."
+            };
         }
-    )
-    currentToken = responseToken.bearer;
-    return responseToken.bearer;
 
-    })
+        return {
+            ok: true,
+            status: "AUTHENTICATED",
+            token: response.bearer
+        };
+    } catch (error) {
+        console.warn("Unable to retrieve Fabric token:", error);
 
-console.log("background loaded");
+        return {
+            ok: false,
+            status: "CONTENT_SCRIPT_UNAVAILABLE",
+            message: "Refresh the Fabric tab and try again."
+        };
+    }
+}
+
+async function refreshActiveTabAuth(tabId) {
+    try {
+        const tab = await browser.tabs.get(tabId);
+
+        // Ignore results for tabs that are no longer active.
+        const [activeTab] = await browser.tabs.query({
+            active: true,
+            windowId: tab.windowId
+        });
+
+        if (activeTab?.id !== tabId) return;
+
+        const auth = await getTokenForTab(tabId, tab.url);
+
+        // Check again in case the user switched tabs while fetching.
+        const [currentTab] = await browser.tabs.query({
+            active: true,
+            windowId: tab.windowId
+        });
+
+        if (currentTab?.id !== tabId) return;
+
+        await browser.runtime.sendMessage({
+            type: "AUTH_STATE_CHANGED",
+            auth
+        }).catch(() => {
+            // The side panel may not currently be open.
+        });
+    } catch (error) {
+        console.warn("Unable to refresh authentication:", error);
+    }
+}
+
+// Initial request from panel.js
+browser.runtime.onMessage.addListener((message) => {
+    if (message.type !== "GET_TOKEN") return;
+
+    return (async () => {
+        const [tab] = await browser.tabs.query({
+            active: true,
+            currentWindow: true
+        });
+
+        if (!tab?.id) {
+            return {
+                ok: false,
+                status: "NO_ACTIVE_TAB",
+                message: "No active tab was found."
+            };
+        }
+
+        return getTokenForTab(tab.id, tab.url);
+    })();
+});
+
+// Automatically detect tab switches.
+browser.tabs.onActivated.addListener(({ tabId }) => {
+    refreshActiveTabAuth(tabId);
+});
+
+// Detect navigation to Fabric and completed page loads.
+browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.status === "complete" || changeInfo.url) {
+        refreshActiveTabAuth(tabId);
+    }
+});
+
+
+
+
+// console.log("background loaded");
 
 
 browser.runtime.onInstalled.addListener(() => {
@@ -54,7 +158,7 @@ browser.runtime.onInstalled.addListener(() => {
         title: "Save to Fabrizio",
         contexts: ["link"],
     });
-    console.log("created contextMenus")
+    // console.log("created contextMenus")
 });
 
 

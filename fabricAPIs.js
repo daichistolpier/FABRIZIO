@@ -30,19 +30,35 @@ export async function getConnectionInfo(id, token) {
 
 
 export async function getAllWorkspaces(token) {
+    if (!token || typeof token !== "string") {
+        throw new Error("AUTH_REQUIRED: No authentication token provided.");
+    }
 
-    console.log("reading from API")
-    const listAllWorkspacesURL = "https://api.fabric.microsoft.com/v1/workspaces"
-    const allWorkspacesResponse = await fetch(listAllWorkspacesURL,
-        {
-            headers: {
-                "Authorization": `Bearer ${token}`
-            }
-        })
+    const listAllWorkspacesURL =
+        "https://api.fabric.microsoft.com/v1/workspaces";
 
-    const { value } = await allWorkspacesResponse.json();
-    return value
+    const response = await fetch(listAllWorkspacesURL, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
 
+    if (response.status === 401) {
+        throw new Error("AUTH_EXPIRED: Your session has expired. Reopen or refresh Microsoft Fabric.");
+    }
+
+    if (response.status === 403) {
+        throw new Error("PERMISSION_DENIED: You don't have permission to access workspaces.");
+    }
+
+    if (!response.ok) {
+        throw new Error(
+            `FABRIC_API_ERROR: ${response.status} ${response.statusText}`
+        );
+    }
+
+    const data = await response.json();
+    return data.value ?? [];
 }
 
 export async function getWorkspaceIdFromName  (inputValue, allWorkspaces, token) {
@@ -88,7 +104,7 @@ export async function getWorkspaceNameFromId(workspaceName, token) {
 
 export async function getAllItemsFromWorkspace(workspaceId, token) {
     if (!workspaceId) return [];
-    console.log("reading from API")
+    // console.log("reading from API")
 
     const getItemsfromWsURL = `https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/items/`
 
@@ -107,36 +123,58 @@ export async function getAllItemsFromWorkspace(workspaceId, token) {
 
 
 export async function getJobInstance(workspaceId, itemId, type, token) {
-    let getJobInstancesUrl = ''
-    if (type == "SemanticModel") { 
-        getJobInstancesUrl = `https://api.powerbi.com/v1.0/myorg/groups/${workspaceId}/datasets/${itemId}/refreshes`;
-    
-    }
-    else if (type == "DataPipeline") {
-        getJobInstancesUrl = `https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/items/${itemId}/jobs/instances`
+
+    if (!token || typeof token !== "string") {
+        throw new Error("AUTH_REQUIRED: No authentication token provided.");
     }
 
-    const getJobInstanceResponse = await fetch(getJobInstancesUrl,
-        {
-            headers: {
-                "Authorization": `Bearer ${token}`,
-            }
+    if (!workspaceId || !itemId) {
+        throw new Error("INVALID_PARAMETERS: Workspace ID and item ID are required.");
+    }
+
+    let getJobInstancesUrl = "";
+
+    if (type === "SemanticModel") {
+        getJobInstancesUrl =
+            `https://api.powerbi.com/v1.0/myorg/groups/${workspaceId}/datasets/${itemId}/refreshes`;
+    } else if (type === "DataPipeline") {
+        getJobInstancesUrl =
+            `https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/items/${itemId}/jobs/instances`;
+    } else {
+        throw new Error(`UNSUPPORTED_TYPE: Job history is not supported for "${type}".`);
+    }
+
+    const response = await fetch(getJobInstancesUrl, {
+        headers: {
+            Authorization: `Bearer ${token}`
         }
-    )
+    });
 
-    const getJobInstanceJson = await getJobInstanceResponse.json();
-    // console.log(getJobInstanceJson)
+    const responseText = await response.text();
 
-    if (!getJobInstanceResponse.ok) {
-        const httpStatus = getJobInstanceResponse.status;
-        const errorText = getJobInstanceJson.message ?? JSON.stringify(getJobInstanceJson);
-
-        return `HTTP Status ${httpStatus}\n${errorText}`
-
+    let data;
+    try {
+        data = responseText ? JSON.parse(responseText) : {};
+    } catch {
+        data = { message: responseText || response.statusText };
     }
-    
 
-    return getJobInstanceJson;
+    if (response.status === 401) {
+        throw new Error("AUTH_EXPIRED: Your session has expired. Reopen or refresh Microsoft Fabric.");
+    }
+
+    if (response.status === 403) {
+        throw new Error("PERMISSION_DENIED: You don't have permission to access this job history.");
+    }
+
+    if (!response.ok) {
+        const errorMessage =
+            data.message ?? data.error?.message ?? JSON.stringify(data);
+
+        throw new Error(`FABRIC_API_ERROR: HTTP ${response.status} - ${errorMessage}`);
+    }
+
+    return data;
 }
 
 

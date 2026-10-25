@@ -1,4 +1,4 @@
-console.log("CONTENT SCRIPT LOADED");
+// console.log("CONTENT SCRIPT LOADED");
 
 const getToken = function() {
     const sessionStorageKey = Object.keys(sessionStorage).find(key => {
@@ -26,7 +26,7 @@ const getToken = function() {
 
 browser.runtime.onMessage.addListener(async message =>{
     if (message?.type !== "GET_TOKEN") return;
-    console.log("received")
+    // console.log("received")
     let token = getToken()
     return {
         bearer: token

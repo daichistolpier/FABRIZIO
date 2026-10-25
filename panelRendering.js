@@ -102,7 +102,7 @@ export async function renameFavLink(event, favoriteLinks, favContainer) {
 
 export function renderFiltWsAndItems(listToRender, whereToRender, itemClassName  ) {
     whereToRender.innerHTML = ''
-    if (!listToRender.length) {
+    if (!listToRender?.length) {
         whereToRender.innerHTML =
             '<div class="no-results">No results...</div>';
         return;
@@ -152,8 +152,6 @@ export function filterWsAndItems(listToFilter, inputForm, filteredItemsContainer
         items = items.filter(item =>
             item.type === currentTypeFilter
         );
-        // console.log("items", items)
-        // renderTypeFilters(chipsContainer, items, currentTypeFilter);
     }
 
     renderFiltWsAndItems(items, filteredItemsContainer, itemClassName);
@@ -163,7 +161,6 @@ export function filterWsAndItems(listToFilter, inputForm, filteredItemsContainer
 
 export function renderClickedObject(fabricObjectType, item, whereToRender, favLinkList) {
     if (!item) return;
-    // console.log("item", item)
     let favStarIcon = null;
     let goToAnchor = null;
     let historyButton = null;
@@ -225,7 +222,6 @@ function createSaveIcon(type, fullFabricUrl, favLinkList, itemId) {
 
     const starImg = document.createElement("img");
     // fill in or empty the star
-    // console.log("star icon", itemId)
     const foundInFav = favLinkList.find(
         item => item.objectId === itemId
     )
@@ -288,6 +284,19 @@ function createRenameButton() {
 }
 
 
+function isAllowedFabricUrl(value) {
+    try {
+        const url = new URL(value);
+
+        return (
+            url.protocol === "https:" &&
+            url.hostname === "app.fabric.microsoft.com"
+        );
+    } catch {
+        return false;
+    }
+}
+
 export function renderFavLinks(whereToRender, favoriteLinksList){
     whereToRender.innerHTML = '';
     // const favHeader = document.createElement("h3");
@@ -298,7 +307,15 @@ export function renderFavLinks(whereToRender, favoriteLinksList){
 
 
     favoriteLinksList
-    .sort((a, b) => a.displayName.localeCompare(b.displayName))
+        .filter(favLink =>
+            favLink &&
+            typeof favLink.displayName === "string" &&
+            typeof favLink.url === "string" &&
+            isAllowedFabricUrl(favLink.url)
+        )
+        .sort((a, b) =>
+            a.displayName.localeCompare(b.displayName)
+        )
     .forEach(favLink =>{
         const linkItemDiv = document.createElement("div");
         const linkItemAnch = document.createElement("a");
@@ -337,7 +354,6 @@ export function renderFavLinks(whereToRender, favoriteLinksList){
         linkItemAnch.target = "_blank";
         linkItemAnch.rel = "noopener noreferrer";
         if (favLink?.wsName){
-            console.log()
             const workspaceNameDiv = document.createElement("div");
             workspaceNameDiv.classList.add("fav--ws-name")
             workspaceNameDiv.textContent = favLink?.wsName;
@@ -360,9 +376,7 @@ export function renderFavLinks(whereToRender, favoriteLinksList){
     whereToRender.append(favLinkList);
 }
 
-export function renderTypeFilters(itemTypeFilters, items, selectedTypeFilter) {
-    console.log("rendeing chips")
-    
+export function renderTypeFilters(itemTypeFilters, items, selectedTypeFilter) {    
     itemTypeFilters.innerHTML = '';
 
     const typeSet = new Set(
@@ -725,15 +739,7 @@ export function renderNoFav(favContainer){
     noFavDiv.classList.add("no-favorites");
     noFavDiv.textContent = "You don't have any favorites yet. Click the star icon to save items here..."
     favContainer.appendChild(noFavDiv);
-    console.log("noFavDiv", noFavDiv)
 }
-
-
-// export function renderConnectionInfo(jsonMessage, getConnectionInfoDiv) {
-//     const connectionResponseDiv = document.createElement("div");
-//     connectionResponseDiv.textContent = JSON.stringify(jsonMessage);
-//     getConnectionInfoDiv.appendChild(connectionResponseDiv);
-// }
 
 
 
@@ -769,11 +775,15 @@ function createJsonTree(obj) {
                     const row = document.createElement("div");
                     row.classList.add("json-row");
 
-                    row.innerHTML = `
-                        <span class="json-key">[${index}]</span>
-                        <span class="json-value">${item}</span>
-                    `;
+                    const jsonKey = document.createElement("span");
+                    jsonKey.classList.add("json-key");
+                    jsonKey.textContent = `[${index}]`;
 
+                    const jsonValue = document.createElement("span");
+                    jsonValue.classList.add("json-value");
+                    jsonValue.textContent = String(item ?? "null");
+
+                    row.append(jsonKey, jsonValue);
                     details.appendChild(row);
                 }
             });
@@ -782,7 +792,7 @@ function createJsonTree(obj) {
         }
 
         // Objects
-        else if (value && typeof value === "object") {
+        else if (value !== null && typeof value === "object") {
             const details = document.createElement("details");
             details.open = true;
 
@@ -800,11 +810,15 @@ function createJsonTree(obj) {
             const row = document.createElement("div");
             row.classList.add("json-row");
 
-            row.innerHTML = `
-                <span class="json-key">${key}:</span>
-                <span class="json-value">${value}</span>
-            `;
+            const jsonKey = document.createElement("span");
+            jsonKey.classList.add("json-key");
+            jsonKey.textContent = `${key}:`;
 
+            const jsonValue = document.createElement("span");
+            jsonValue.classList.add("json-value");
+            jsonValue.textContent = String(value ?? "null");
+
+            row.append(jsonKey, jsonValue);
             container.appendChild(row);
         }
     }
@@ -872,4 +886,21 @@ export async function savePanelStates() {
     await browser.storage.local.set({
         ["fabrizioPanelStates"]: states
     });
+}
+
+
+export function showAuthMessage(message) {
+    let notice = document.querySelector("#auth-notice");
+
+    if (!notice) {
+        notice = document.createElement("div");
+        notice.id = "auth-notice";
+        notice.className = "auth-notice";
+
+        // document.body.prepend(notice);
+        document.querySelector(".title-wrapper").append(notice)
+    }
+
+    notice.textContent = message;
+    notice.hidden = false;
 }
