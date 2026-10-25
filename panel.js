@@ -40,7 +40,9 @@ import {
     renderLatestRuns,
     showFavItemHistoryRuns,
     renderNoFav,
-    renderConnectionInfo
+    renderConnectionInfo,
+    restorePanelStates,
+    savePanelStates
 } from "./panelRendering.js"
 
 // GET TOKEN
@@ -58,6 +60,7 @@ let { fabrizioGlobalSearch: selectedContext = null} =
 
 let { fabrizioFavLinks : favoriteLinks = [] } = 
     await browser.storage.local.get("fabrizioFavLinks")
+
 
 let selectedWs = selectedContext?.workspace || null
 let selectedItems = selectedContext?.items || null;
@@ -527,3 +530,9 @@ jsonbeautifierForm.addEventListener("submit", (e) => {
 });
 
 
+// panel cache
+document.querySelectorAll("details.panel-section").forEach(panel => {
+    panel.addEventListener("toggle", savePanelStates);
+});
+
+await restorePanelStates();

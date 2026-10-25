@@ -356,6 +356,7 @@ export function renderFavLinks(whereToRender, favoriteLinksList){
         favLinkList.append(linkItemDiv);
 
     })
+    
     whereToRender.append(favLinkList);
 }
 
@@ -836,4 +837,39 @@ export function renderConnectionInfo(jsonMessage, getConnectionInfoDiv) {
     }
 
     getConnectionInfoDiv.appendChild(wrapper);
+}
+
+
+// panel states
+
+// Restore panel states from cache
+export async function restorePanelStates() {
+    const { fabrizioPanelStates: states = {} } =
+        await browser.storage.local.get("fabrizioPanelStates");
+
+    document.querySelectorAll("details.panel-section").forEach(panel => {
+        const panelId = panel.id;
+
+        if (!panelId) return;
+
+        // Apply the saved state only if one exists
+        if (Object.hasOwn(states, panelId)) {
+            panel.open = states[panelId];
+        }
+    });
+}
+
+// Save panel states to cache
+export async function savePanelStates() {
+    const states = {};
+
+    document.querySelectorAll("details.panel-section").forEach(panel => {
+        if (panel.id) {
+            states[panel.id] = panel.open;
+        }
+    });
+
+    await browser.storage.local.set({
+        ["fabrizioPanelStates"]: states
+    });
 }

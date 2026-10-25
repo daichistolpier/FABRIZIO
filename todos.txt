@@ -16,14 +16,14 @@ DONE
 // expand fail message (and json beautifier input) --> ok
 // history show date in -> if differennt from previous one --> OK
 //// get connection shall not return invalid josn and not append new result --> ok?
+// toggle to be saved in cache --> ok
+// toogle "others (json beautifier, get connection info)" --> ok
+// when renaming, no href --> OK
 
 
 -------------------------------
 TO DO
-// toggle to be saved in cache
-// toogle "others (json beautifier, get connection info)"
 // tab manager?
 // favorite organizers
 // rapid ws item clicker
 // arrows to naviaget items???
-// when renaming, no href
