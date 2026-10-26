@@ -61,62 +61,45 @@ export async function getAllWorkspaces(token) {
     return data.value ?? [];
 }
 
-export async function getWorkspaceIdFromName  (inputValue, allWorkspaces, token) {
-    // const allWorspaces = await getAllWorkspaces(token)
-    
-    if (!allWorkspaces) return;
 
-    return allWorkspaces.filter(
-        ws => ws.displayName?.toLowerCase().includes(inputValue.toLowerCase())
-    );
-    
-}
-
-
-export async function getWorkspaceNameFromId(workspaceName, token) {
-    if (!workspaceName) return null;
-
-    const getWorkspaceNameFromIdURL = "https://api.fabric.microsoft.com/v1/workspaces/"
-
-    const getWorkspaceNameFromIdResponse = await fetch(getWorkspaceNameFromIdURL + workspaceName,
-        {
-            headers: {
-                "Authorization": `Bearer ${token}`,
-            }
-        }
-    )
-
-    const getworkspaceJson = await getWorkspaceNameFromIdResponse.json();
-
-    if (!getWorkspaceNameFromIdResponse.ok) {
-        const httpStatus = getWorkspaceNameFromIdResponse.status;
-        const errorText = getworkspaceJson.message ?? JSON.stringify(getworkspaceJson);
-
-
-        return `HTTP Status ${httpStatus}\n${errorText}`
-
-    }
-    
-
-    return getworkspaceJson;
-}
 
 
 export async function getAllItemsFromWorkspace(workspaceId, token) {
+    if (!token || typeof token !== "string") {
+        throw new Error("AUTH_REQUIRED: No authentication token provided.");
+    }
+
     if (!workspaceId) return [];
-    // console.log("reading from API")
 
-    const getItemsfromWsURL = `https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/items/`
+    const getItemsfromWsURL =
+        `https://api.fabric.microsoft.com/v1/workspaces/${encodeURIComponent(workspaceId)}/items`;
 
-    const getItemsResponse = await fetch(getItemsfromWsURL,
-        {
-            headers: {
-                "Authorization": `Bearer ${token}`,
-            }
+    const response = await fetch(getItemsfromWsURL, {
+        headers: {
+            Authorization: `Bearer ${token}`
         }
-    )
-    const { value } = await getItemsResponse.json();
-    return value;
+    });
+
+    if (response.status === 401) {
+        throw new Error(
+            "AUTH_EXPIRED: Your session has expired. Reopen or refresh Microsoft Fabric."
+        );
+    }
+
+    if (response.status === 403) {
+        throw new Error(
+            "PERMISSION_DENIED: You don't have permission to access items in this workspace."
+        );
+    }
+
+    if (!response.ok) {
+        throw new Error(
+            `FABRIC_API_ERROR: ${response.status} ${response.statusText}`
+        );
+    }
+
+    const data = await response.json();
+    return data.value ?? [];
 }
 
 

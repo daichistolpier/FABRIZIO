@@ -211,9 +211,10 @@ wsFoundContainer.addEventListener("click", async e =>{
 
 // WS CLICK ON WS INFO SAVE BUTTON
 wsInfoContainer.addEventListener("click", async (e) => {
-    e.preventDefault();
     if (!requireAuth(token)) return;
     if (!e.target.closest("button")?.classList.contains("workspace--save")) return;
+
+    e.preventDefault();
     const button = e.target.closest("button");
     const wsLink = button.parentElement.querySelector('a');
     const wsName = button.parentElement.querySelector("h4");
@@ -246,32 +247,72 @@ wsInfoContainer.addEventListener("click", async (e) => {
 itemFormInput.addEventListener("focus", async () => {
     if (!requireAuth(token)) return;
     if (!selectedWs) return;
-    // ON FOCUS, LOAD EVERYHTING AND RENDER EVERYTHING AND EVERY ITEM TYPE
-    if (!selectedWs) return;
 
-    if (!itemsCache.has(selectedWs.id)) {
-        const items = await getAllItemsFromWorkspace(
-            selectedWs.id,
-            token
-        );
-        itemsCache.set(selectedWs.id, items);
+    const workspaceId = selectedWs.id;
+
+    // Load items if they aren't cached
+    if (!itemsCache.has(workspaceId)) {
+        try {
+            const items = await getAllItemsFromWorkspace(
+                workspaceId,
+                token
+            );
+            itemsCache.set(workspaceId, items);
+
+        } catch (error) {
+            console.error("Could not load items:", error);
+
+            if (
+                error.message.startsWith("AUTH_REQUIRED") ||
+                error.message.startsWith("AUTH_EXPIRED")
+            ) {
+                showAuthMessage(
+                    "Open Microsoft Fabric and make sure you're signed in."
+                );
+            } else if (error.message.startsWith("PERMISSION_DENIED")) {
+                showAuthMessage(
+                    "You don't have permission to access items in this workspace."
+                );
+            } else {
+                showAuthMessage(
+                    "Could not load workspace items. Please try again."
+                );
+            }
+
+            return;
+        }
     }
 
-    if (!allItems) {
-        allItems = itemsCache.get(selectedWs.id);
+    // Ensure items exist before rendering
+    allItems = itemsCache.get(workspaceId);
 
-        allItems.sort((a, b) =>
-            a.displayName.localeCompare(b.displayName)
-        );
+    if (!Array.isArray(allItems)) {
+        showAuthMessage("Could not load workspace items. Please try again.");
+        return;
     }
-    // render type filters
-    renderTypeFilters(itemTypeFilters, allItems, selectedTypeFilter);
 
-    // render filtered objects
-    filterWsAndItems(allItems, itemFormInput, itemFoundContainer, "fabricItem", selectedTypeFilter,  itemTypeFilters, true);
+    allItems.sort((a, b) =>
+        a.displayName.localeCompare(b.displayName)
+    );
+
+    renderTypeFilters(
+        itemTypeFilters,
+        allItems,
+        selectedTypeFilter
+    );
+
+    filterWsAndItems(
+        allItems,
+        itemFormInput,
+        itemFoundContainer,
+        "fabricItem",
+        selectedTypeFilter,
+        itemTypeFilters,
+        true
+    );
+
     showItemDropdown();
     showTypeFilters();
-
 });
 
 // FILTER BY TYPING
@@ -285,9 +326,9 @@ itemFormInput.addEventListener("input", () => {
 
 // CLICK ON CHIPS
 itemTypeFilters.addEventListener("click", e => {
-    e.preventDefault();
     if (!requireAuth(token)) return;
     if (e.target.tagName !== "BUTTON") return;
+    e.preventDefault();
     const button = e.target;
     itemTypeFilters
         .querySelectorAll("button")
@@ -330,104 +371,166 @@ itemFoundContainer.addEventListener("click", async e =>{
 
 // CLICK ON ITEM INFO (SAVE AND HISTORY)
 itemInfoContainer.addEventListener("click", async (e) => {
-    e.preventDefault();
-    if (!requireAuth(token)) return;
-    // SAVE ITEM
-    if (e.target.closest("button")?.classList.contains("fabricItem--save")){
-        const itemCtn = e.target.closest(".fabricItem--container")
-        const itemLink = itemCtn.parentElement.querySelector('a').href;
-        const itemName = itemCtn.parentElement.querySelector("h4");
-        // if ( favoriteLinks.find(item => item.url === itemLink) ) return;
-        if ( favoriteLinks.find(item => item.objectId === itemCtn.dataset.objectId && item.type === itemCtn.dataset.objectType ) ) return;
-        
-        // fill in star
-        const starIcon = itemCtn.querySelector(".save--star-icon")
-        starIcon.src = chrome.runtime.getURL("img/starfill.png")
-        
-        allWorkspaces = await reloadWorkspaces();
+    const button = e.target.closest("button");
+    if (!button) return;
 
-        const workspaceName = allWorkspaces.find(item => {
-            return item.id === itemCtn.dataset.wsId;
-        } )
+    // SAVE ITEM
+    if (button.classList.contains("fabricItem--save")) {
+        e.preventDefault();
+        if (!requireAuth(token)) return;
+
+        const itemCtn = button.closest(".fabricItem--container");
+        if (!itemCtn) return;
+
+        const itemLink = itemCtn.querySelector("a")?.href;
+        const itemName = itemCtn.querySelector("h4");
+
+        if (!itemLink || !itemName) return;
+
+        const alreadySaved = favoriteLinks.find(item =>
+            item.objectId === itemCtn.dataset.objectId &&
+            item.type === itemCtn.dataset.objectType
+        );
+
+        if (alreadySaved) return;
+
+        allWorkspaces = await reloadWorkspaces();
+        if (!Array.isArray(allWorkspaces)) return;
+
+        const workspaceName = allWorkspaces.find(item =>
+            item.id === itemCtn.dataset.wsId
+        );
+
+        if (!workspaceName) {
+            showAuthMessage("Could not find the workspace. Please try again.");
+            return;
+        }
+
         favoriteLinks.push({
-            displayName : itemName.textContent,
-            type: itemCtn.dataset.objectType, 
+            displayName: itemName.textContent,
+            type: itemCtn.dataset.objectType,
             objectId: itemCtn.dataset.objectId,
             wsId: itemCtn.dataset.wsId,
             url: itemLink,
-            wsName : workspaceName.displayName
-        })
-    
-        await browser.storage.local.set({ "fabrizioFavLinks": favoriteLinks });
-        // renderFavLinks(favContainer, favoriteLinks);
-    }
-    //SEE ITEM HISTORY
-    else if (e.target.closest("button")?.classList.contains("fabricItem--history")
-        ||
-        e.target.closest("button")?.classList.contains("button--refresh--history")) {
+            wsName: workspaceName.displayName
+        });
 
-        const button = e.target.closest("button");
+        await browser.storage.local.set({
+            fabrizioFavLinks: favoriteLinks
+        });
+
+        const starIcon = itemCtn.querySelector(".save--star-icon");
+        if (starIcon) {
+            starIcon.src = chrome.runtime.getURL("img/starfill.png");
+        }
+    }
+
+    // SEE ITEM HISTORY / REFRESH HISTORY
+    else if (
+        button.classList.contains("fabricItem--history") ||
+        button.classList.contains("button--refresh--history")
+    ) {
+        e.preventDefault();
+        if (!requireAuth(token)) return;
+
+        const isRefresh = button.classList.contains("button--refresh--history");
         button.classList.toggle("active");
 
-        const existingHistory = itemInfoContainer.querySelector(".run-history-container");
-        const noHistoryFound = itemInfoContainer.querySelector(".no--history--found");
+        const itemContainer =
+            itemInfoContainer.querySelector(".fabricItem--container");
 
-        const isRefresh =
-            e.target.closest("button")?.classList.contains(
-                "button--refresh--history"
-            );
+        if (!itemContainer) return;
+
+        const existingHistory =
+            itemInfoContainer.querySelector(".run-history-container");
+
+        const noHistoryFound =
+            itemInfoContainer.querySelector(".no--history--found");
 
         if (!isRefresh) {
             if (existingHistory) {
-                // existingHistory.hidden = !existingHistory.hidden;
                 existingHistory.classList.toggle("hidden");
                 return;
             }
+
             if (noHistoryFound) {
-                // noHistoryFound.hidden = !noHistoryFound.hidden;
                 noHistoryFound.classList.toggle("hidden");
                 return;
             }
-        }
-        else {
+        } else {
             existingHistory?.remove();
             noHistoryFound?.remove();
         }
-        
-        // const itemContainer = e.target.closest(".global--clicked-item").querySelector(".fabricItem--container");
-        const itemContainer =
-            itemInfoContainer.querySelector(
-                ".fabricItem--container"
-            );
 
         const workspaceId = itemContainer.dataset.wsId;
         const itemId = itemContainer.dataset.objectId;
         const objectType = itemContainer.dataset.objectType;
-        const jobInstJson = await getJobInstance(workspaceId, itemId, objectType, token);
+
+        let jobInstJson;
+
+        try {
+            jobInstJson = await getJobInstance(
+                workspaceId,
+                itemId,
+                objectType,
+                token
+            );
+        } catch (error) {
+            console.error("Could not load item history:", error);
+
+            if (
+                error.message?.startsWith("AUTH_REQUIRED") ||
+                error.message?.startsWith("AUTH_EXPIRED")
+            ) {
+                showAuthMessage(
+                    "Open Microsoft Fabric and make sure you're signed in."
+                );
+            } else if (error.message?.startsWith("PERMISSION_DENIED")) {
+                showAuthMessage(
+                    "You don't have permission to access item history."
+                );
+            } else {
+                showAuthMessage(
+                    "Could not load item history. Please try again."
+                );
+            }
+
+            return;
+        }
 
         if (!jobInstJson?.value?.length) {
             const noHistFound = document.createElement("div");
             noHistFound.classList.add("no--history--found");
-            noHistFound.textContent = "No runs were found..."
-            itemInfoContainer.append(noHistFound)
-            // itemInfoDiv.append(noHistFound)
-            return
-        };
+            noHistFound.textContent = "No runs were found...";
+            itemInfoContainer.append(noHistFound);
+            return;
+        }
 
-        // render history runs
-        const runContainer = renderLatestRuns (jobInstJson, workspaceId, itemId, objectType)
-        if (runContainer) itemInfoContainer.append(runContainer);
+        const runContainer = renderLatestRuns(
+            jobInstJson,
+            workspaceId,
+            itemId,
+            objectType
+        );
 
-
+        if (runContainer) {
+            itemInfoContainer.append(runContainer);
+        }
     }
-    // SEE FAIL MESSAGE
-    else if (e.target.closest("button")?.classList.contains("info--fail--button")) {
-        const failurediv = e.target.closest(".run-history-item").querySelector(".failure");
-        failurediv.hidden = !failurediv.hidden;
-    }
-    
-})
 
+    // SEE FAILURE MESSAGE
+    else if (button.classList.contains("info--fail--button")) {
+        e.preventDefault();
+
+        const failurediv = button
+            .closest(".run-history-item")
+            ?.querySelector(".failure");
+
+        if (failurediv) {
+            failurediv.hidden = !failurediv.hidden;
+        }
+    }
+});
 
 // FAVORITES
 favContainer.addEventListener("click", async (e) => {
