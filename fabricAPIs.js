@@ -1,4 +1,5 @@
 // let cachedAllWorkspaces = null;
+// add tenant lookup https://management.azure.com/tenants?api-version=2022-12-01
 
 export async function getConnectionInfo(id, token) {
     if (!id) return null;
