@@ -191,6 +191,17 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
             return;
     }
 
+    if (!tab?.id || !isFabricTab(tab.url)) return;
+
+    const auth = await getTokenForTab(tab.id, tab.url);
+
+    if (!auth.ok) {
+        console.warn(auth.message);
+        return;
+    }
+
+    currentToken = auth.token;
+
 
     if (!favUrl || !favUrl.includes("https://app.fabric.microsoft.com")) return;
     favObject.url = favUrl;
@@ -205,9 +216,23 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
     
     // convert ID to display name
     if (wsId) {
-        if (!workspaces) workspaces = await getAllWorkspaces(currentToken);
-        const wsObj = workspaces.find(item => item.id === wsId);
-        wsName = wsObj.displayName;
+        try {
+            if (!Array.isArray(workspaces)) {
+                workspaces = await getAllWorkspaces(currentToken);
+            }
+
+            const wsObj = workspaces.find(item => item.id === wsId);
+
+            if (!wsObj) {
+                console.warn("Workspace not found:", wsId);
+                return;
+            }
+
+            wsName = wsObj.displayName;
+        } catch (error) {
+            console.error("Could not load workspaces:", error);
+            return;
+        }
     }
 
     if(itemId){

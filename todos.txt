@@ -23,6 +23,8 @@ DONE
 
 -------------------------------
 TO DO
+// multitenant
+
 // tab manager?
 // favorite organizers
 // rapid ws item clicker
