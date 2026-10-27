@@ -638,6 +638,7 @@ browser.storage.onChanged.addListener((changes, area) => {
             );
         } else {
             wsInfoContainer.innerHTML = "";
+            wsFormInput.value = "";
         }
 
         if (selectedItems) {
