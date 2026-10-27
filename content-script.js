@@ -1,27 +1,34 @@
 // console.log("CONTENT SCRIPT LOADED");
 
 const getToken = function() {
-    const sessionStorageKey = Object.keys(sessionStorage).find(key => {
-        try{
-            return key.includes("https://analysis.windows.net/powerbi/api/.default")
-        } catch {
-            return null;
-        }
-    })
-    if (!sessionStorageKey) throw new Error(`Error in reading the storage default powerBi API`);
+    const POWERBI_SCOPE =
+        "https://analysis.windows.net/powerbi/api/.default";
 
-    const secret = sessionStorage.getItem(sessionStorageKey)
-    if (!secret) throw new Error(`Error in reading the secret`);
+    const tokens = Object.keys(sessionStorage)
+        .filter(key => key.includes(POWERBI_SCOPE))
+        .map(key => {
+            try {
+                return JSON.parse(sessionStorage.getItem(key));
+            } catch {
+                return null;
+            }
+        })
+        .filter(entry =>
+            entry?.secret &&
+            entry.target?.includes(POWERBI_SCOPE)
+        )
+        .sort((a, b) =>
+            Number(b.cachedAt) - Number(a.cachedAt)
+        );
 
-    const bearer = JSON.parse(sessionStorage.getItem(sessionStorageKey)).secret
-    return bearer;
+    if (!tokens.length) {
+        throw new Error("No Power BI API token found in sessionStorage.");
+    }
 
-}
+    // The newest cached token is now first.
+    return tokens[0].secret;
+};
 
-// let the panel knows that the cs is loaded
-// browser.runtime.sendMessage({
-//     type:"CS_READY"
-// })
 
 
 browser.runtime.onMessage.addListener(async message =>{
