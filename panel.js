@@ -656,21 +656,34 @@ browser.storage.onChanged.addListener((changes, area) => {
 
 
 // GET CONNECTION INFO
-getConnectionInfoDiv.addEventListener("submit", async (e) =>{
+getConnectionInfoDiv.addEventListener("submit", async (e) => {
     e.preventDefault();
+
     if (!requireAuth(token)) return;
-    const inputValue = inputGetConnectionInfo.value;
-    if (inputValue.length  !== 36){
-        inputGetConnectionInfo.value = '';
+
+    const inputValue = inputGetConnectionInfo.value.trim();
+
+    if (inputValue.length !== 36) {
+        inputGetConnectionInfo.value = "";
         return;
     }
 
-    const jsonMessage = await getConnectionInfo(inputValue, token);
+    try {
+        const jsonMessage = await getConnectionInfo(inputValue, token);
 
-    renderBeautifiedJson(jsonMessage, getConnectionInfoDiv)
+renderBeautifiedJson(jsonMessage, getConnectionInfoDiv);
+        renderBeautifiedJson(jsonMessage, getConnectionInfoDiv);
+    } catch (error) {
+        console.error("Could not get connection info:", error);
 
-    inputGetConnectionInfo.value = '';
-})
+        renderBeautifiedJson(
+            { error: error.message },
+            getConnectionInfoDiv
+        );
+    } finally {
+        inputGetConnectionInfo.value = "";
+    }
+});
 
 
 
@@ -791,6 +804,14 @@ document.querySelectorAll(".refresh-cachedObj").forEach((button) => {
     });
 });
 
+
+// Save panel states whenever a section is opened or closed
+document.querySelectorAll("details.panel-section").forEach(panel => {
+    panel.addEventListener("toggle", savePanelStates);
+});
+
+// Restore previously saved states
+await restorePanelStates();
 await restorePanelStates();
 
 

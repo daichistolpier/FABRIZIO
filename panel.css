@@ -366,7 +366,7 @@ img {
 }
 
 .favorites {
-    max-height: 600px;
+    max-height: 400px;
     overflow-y: auto;
 }
 
@@ -466,7 +466,7 @@ h4 {
 
 .link--item--div {
     display: grid;
-    grid-template-columns: 32px minmax(0, 1fr) 32px 32px;
+    grid-template-columns: minmax(0, 1fr) 32px 32px 32px;
     align-items: center;
     column-gap: 8px;
     row-gap: 8px;
@@ -491,7 +491,7 @@ h4 {
 /* Favorite link content */
 
 .link--item--div > .link--item--a {
-    grid-column: 2;
+    grid-column: 1;
     grid-row: 1;
 
     display: flex;
@@ -505,7 +505,7 @@ h4 {
 
 /* History button: column 1 */
 .link--item--div > .fabricItem--history {
-    grid-column: 1;
+    grid-column: 2;
     grid-row: 1;
 }
 
@@ -648,7 +648,7 @@ h4 {
 .fabricItem--history,
 .workspace--save,
 .fabricItem--save,
-.button--refresh--histor{
+.button--refresh--history{
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1630,7 +1630,7 @@ input[type="text"]:focus {
 
     .title-wrapper {
         margin: -10px -10px 0;
-        min-height: 190px;
+        min-height: 130px;
         padding: 20px 10px;
     }
 
@@ -1676,11 +1676,11 @@ input[type="text"]:focus {
         height: 28px;
     }
 
-    .link--item--div {
+    /* .link--item--div {
         grid-template-columns: 24px minmax(0, 1fr) 27px 27px;
         gap: 3px;
         padding: 7px;
-    }
+    } */
     
 }
 
