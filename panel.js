@@ -40,7 +40,7 @@ import {
     renderLatestRuns,
     showFavItemHistoryRuns,
     renderNoFav,
-    renderConnectionInfo,
+    renderBeautifiedJson,
     restorePanelStates,
     savePanelStates,
     showAuthMessage
@@ -577,7 +577,7 @@ favContainer.addEventListener("click", async (e) => {
             await showFavItemHistoryRuns(itemContainer, token);
             break;
         }
-        case (e.target.classList.contains("error-info")): 
+        case (e.target.closest("button")?.classList.contains("info--fail--button")): 
             const failureDiv =
                 e.target
                     .closest(".run-history-item")
@@ -667,7 +667,7 @@ getConnectionInfoDiv.addEventListener("submit", async (e) =>{
 
     const jsonMessage = await getConnectionInfo(inputValue, token);
 
-    renderConnectionInfo(jsonMessage, getConnectionInfoDiv)
+    renderBeautifiedJson(jsonMessage, getConnectionInfoDiv)
 
     inputGetConnectionInfo.value = '';
 })
@@ -713,13 +713,84 @@ jsonbeautifierForm.addEventListener("submit", (e) => {
 
     jsonBeautifierOutput.innerHTML = "";
 
-    renderConnectionInfo(input, jsonBeautifierOutput);
+    renderBeautifiedJson(input, jsonBeautifierOutput);
 });
 
 
-// panel cache
-document.querySelectorAll("details.panel-section").forEach(panel => {
-    panel.addEventListener("toggle", savePanelStates);
+// Refresh cached workspaces and items
+document.querySelectorAll(".refresh-cachedObj").forEach((button) => {
+    button.addEventListener("click", async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!requireAuth(token)) return;
+
+        // Refresh workspace list
+        if (button.closest(".workspace--header")) {
+            allWorkspaces = null;
+
+            allWorkspaces = await reloadWorkspaces();
+
+            if (Array.isArray(allWorkspaces)) {
+                renderFiltWsAndItems(
+                    allWorkspaces,
+                    wsFoundContainer,
+                    "fabricWs"
+                );
+            }
+
+            return;
+        }
+
+        // Refresh items for the currently selected workspace
+        if (button.closest(".item--header")) {
+            if (!selectedWs) return;
+
+            const workspaceId = selectedWs.id;
+
+            // Remove cached items for this workspace
+            itemsCache.delete(workspaceId);
+            allItems = null;
+
+            try {
+                // Fetch fresh items from Fabric
+                allItems = await getAllItemsFromWorkspace(
+                    workspaceId,
+                    token
+                );
+
+                itemsCache.set(workspaceId, allItems);
+
+                allItems.sort((a, b) =>
+                    a.displayName.localeCompare(b.displayName)
+                );
+
+                renderTypeFilters(
+                    itemTypeFilters,
+                    allItems,
+                    selectedTypeFilter
+                );
+
+                filterWsAndItems(
+                    allItems,
+                    itemFormInput,
+                    itemFoundContainer,
+                    "fabricItem",
+                    selectedTypeFilter,
+                    itemTypeFilters,
+                    true
+                );
+            } catch (error) {
+                console.error("Could not refresh workspace items:", error);
+
+                showAuthMessage(
+                    "Could not refresh workspace items. Please try again."
+                );
+            }
+        }
+    });
 });
 
 await restorePanelStates();
+
+

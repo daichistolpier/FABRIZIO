@@ -335,12 +335,8 @@ export function renderFavLinks(whereToRender, favoriteLinksList){
         let itemTypeDiv = document.createElement("div");
         itemTypeDiv.classList.add("item-type");
 
-        // show history
-        if (favLink.type === "DataPipeline" || favLink.type === 'SemanticModel'){
-            const historyButton = createHistoryIcon();
-            linkItemDiv.append(historyButton);
-        }
-
+        
+        
         if (favLink.type === "workspace") {
             itemTypeDiv.textContent = "Workspace";
         }
@@ -371,6 +367,13 @@ export function renderFavLinks(whereToRender, favoriteLinksList){
 
 
         linkItemDiv.append(linkItemAnch, renameLinkName, removeLinkButton);
+        // show history
+        if (favLink.type === "DataPipeline" || favLink.type === 'SemanticModel'){
+            const historyButton = createHistoryIcon();
+            linkItemDiv.append(historyButton);
+        }
+        linkItemDiv.append(renameLinkName, removeLinkButton);
+
 
         favLinkList.append(linkItemDiv);
 
@@ -830,7 +833,7 @@ function createJsonTree(obj) {
 }
 
 // b814ea87-0d04-4186-95b9-201efde32eca
-export function renderConnectionInfo(jsonMessage, getConnectionInfoDiv) {
+export function renderBeautifiedJson(jsonMessage, getConnectionInfoDiv) {
     // getConnectionInfoDiv.replaceChildren();
 
     let wrapper = document.querySelector(".json-viewer")
@@ -842,14 +845,12 @@ export function renderConnectionInfo(jsonMessage, getConnectionInfoDiv) {
     
 
     try {
-        const parsed =
-            typeof jsonMessage === "string"
-                ? JSON.parse(jsonMessage)
-                : jsonMessage;
+        const parsed = JSON.parse(jsonMessage);
 
         wrapper.appendChild(createJsonTree(parsed));
     }
     catch {
+        console.log("not a json")
         wrapper.textContent = jsonMessage;
     }
 

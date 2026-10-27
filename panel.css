@@ -466,9 +466,10 @@ h4 {
 
 .link--item--div {
     display: grid;
-    grid-template-columns: 28px minmax(0, 1fr) 32px 32px;
+    grid-template-columns: 32px minmax(0, 1fr) 32px 32px;
     align-items: center;
-    gap: 5px;
+    column-gap: 8px;
+    row-gap: 8px;
 
     min-width: 0;
     padding: 9px;
@@ -489,15 +490,59 @@ h4 {
 
 /* Favorite link content */
 
-.link--item--a {
+.link--item--div > .link--item--a {
     grid-column: 2;
+    grid-row: 1;
+
     display: flex;
     flex-direction: column;
     gap: 3px;
 
     min-width: 0;
     padding: 3px;
-    margin-left: 10px;
+    margin: 0;
+}
+
+/* History button: column 1 */
+.link--item--div > .fabricItem--history {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.link--item--div > .button--rename--link {
+    grid-column: 3;
+    grid-row: 1;
+}
+
+.link--item--div > .button--remove--link {
+    grid-column: 4;
+    grid-row: 1;
+}
+
+.link--item--div > .run-history-container {
+    grid-column: 1 / -1;
+    grid-row: 2;
+
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    min-width: 0;
+    margin-top: 4px;
+    padding-top: 12px;
+
+    border-top: 1px solid var(--border);
+}
+
+.link--item--a {
+    display: flex;
+    flex: 1 1 0%;
+    flex-direction: column;
+    gap: 3px;
+
+    min-width: 0;
+    padding: 3px;
+    margin: 0;
 }
 
 .rename-input {
@@ -523,6 +568,37 @@ h4 {
         background var(--transition),
         border-color var(--transition),
         box-shadow var(--transition);
+}
+
+/* Final fix: favorite row action buttons */
+
+.link--item--div > .button--rename--link,
+.link--item--div > .button--remove--link {
+    position: relative;
+    display: flex;
+
+    flex: 0 0 32px;
+    width: 32px;
+    min-width: 32px;
+    max-width: 32px;
+    height: 32px;
+
+    margin: 0;
+    padding: 7px;
+
+    box-sizing: border-box;
+}
+
+/* Narrow extension panels */
+@media (max-width: 360px) {
+    .link--item--div > .button--rename--link,
+    .link--item--div > .button--remove--link {
+        flex-basis: 27px;
+        width: 27px;
+        min-width: 27px;
+        max-width: 27px;
+        height: 27px;
+    }
 }
 
 .rename-input,
@@ -572,17 +648,17 @@ h4 {
 .fabricItem--history,
 .workspace--save,
 .fabricItem--save,
-.button--refresh--histor,
-.button--refresh--history{
+.button--refresh--histor{
     display: inline-flex;
     align-items: center;
     justify-content: center;
 
     width: 32px;
     height: 32px;
+    min-width: 32px;
     padding: 7px;
+    margin: 0;
 
-    /* background: transparent; */
     background: #ffff;
     border: 1px solid transparent;
     border-radius: 50%;
@@ -599,9 +675,34 @@ h4 {
         transform var(--transition);
 }
 
+.refresh-cachedObj{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    padding: 7px;
+    margin: 0;
+
+    background: #ffff;
+    border: 1px solid transparent;
+    border-radius: 50%;
+
+    cursor: pointer;
+
+    transition:
+        background var(--transition),
+        border-color var(--transition),
+        transform var(--transition);
+}
+
+
 .button--rename--link:hover,
 .fabricItem--history:hover,
-.button--refresh--history:hover{
+.button--refresh--history:hover,
+.refresh-cachedObj:hover{
     background: var(--accent-soft);
     border-color: var(--accent-border);
 }
@@ -663,7 +764,8 @@ h4 {
 .button--rename--link,
 .button--remove--link,
 .button--refresh--history,
-.status a {
+.status a,
+.refresh-cachedObj{
     position: relative;
 }
 
@@ -675,7 +777,8 @@ h4 {
 .fabricItem--container a:hover::after,
 .button--rename--link:hover::after,
 .button--remove--link:hover::after,
-.button--refresh--history:hover::after{
+.button--refresh--history:hover::after,
+.refresh-cachedObj:hover::after{
     position: absolute;
     bottom: calc(100% + 8px);
     left: 50%;
@@ -720,6 +823,10 @@ h4 {
     content: "Refresh";
 }
 
+.refresh-cachedObj:hover::after {
+    content: "Refresh";
+}
+
 
 
 .status a:hover::after {
@@ -740,6 +847,25 @@ h4 {
     pointer-events: none;
 }
 
+.workspace--header,
+.item--header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    margin-bottom: 5px;
+}
+
+.workspace--header h3,
+.item--header h3 {
+    margin: 0;
+}
+
+.refresh-cachedObj {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
 /* ===================== SEARCH INPUTS ===================== */
 
 .global--ws,
@@ -1054,6 +1180,9 @@ input[type="text"]:focus {
 } */
 
 /* Workspace ID / item ID */
+
+
+
 
 .workspace--container > div:not(.run-history-container),
 .fabricItem--container > div:not(.run-history-container) {
