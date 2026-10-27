@@ -1,10 +1,9 @@
-// console.log("CONTENT SCRIPT LOADED");
+console.log("[Fabrizio] Content script loaded:", location.href);
+const POWERBI_SCOPE =
+    "https://analysis.windows.net/powerbi/api/.default";
 
-const getToken = function() {
-    const POWERBI_SCOPE =
-        "https://analysis.windows.net/powerbi/api/.default";
-
-    const tokens = Object.keys(sessionStorage)
+function getCachedTokens() {
+    return Object.keys(sessionStorage)
         .filter(key => key.includes(POWERBI_SCOPE))
         .map(key => {
             try {
@@ -15,27 +14,87 @@ const getToken = function() {
         })
         .filter(entry =>
             entry?.secret &&
+            entry?.realm &&
+            entry.credentialType === "AccessToken" &&
             entry.target?.includes(POWERBI_SCOPE)
+        );
+}
+
+// Discover tenant IDs represented in the cached Power BI tokens.
+function getCachedTenants() {
+    const tenants = new Map();
+
+    for (const entry of getCachedTokens()) {
+        if (!tenants.has(entry.realm)) {
+            tenants.set(entry.realm, {
+                tenantId: entry.realm,
+                tokenCount: 0
+            });
+        }
+
+        tenants.get(entry.realm).tokenCount++;
+    }
+
+    return [...tenants.values()];
+}
+
+// Retrieve the newest unexpired token for one specific tenant.
+function getTokenForTenant(tenantId) {
+    if (!tenantId) {
+        throw new Error("No tenant ID was specified.");
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+
+    const tokens = getCachedTokens()
+        .filter(entry =>
+            entry.realm.toLowerCase() === tenantId.toLowerCase() &&
+            Number(entry.expiresOn) > now
         )
         .sort((a, b) =>
             Number(b.cachedAt) - Number(a.cachedAt)
         );
 
     if (!tokens.length) {
-        throw new Error("No Power BI API token found in sessionStorage.");
+        throw new Error(
+            `No unexpired Power BI token found for tenant ${tenantId}.`
+        );
     }
 
-    // The newest cached token is now first.
     return tokens[0].secret;
-};
+}
 
+browser.runtime.onMessage.addListener(message => {
+    try {
+        if (message?.type === "GET_TENANTS") {
+            // test
+            // if (message?.type === "GET_TENANTS") {
+            //     return Promise.resolve({
+            //         tenants: [
+            //             {
+            //                 tenantId: "YOUR-REAL-TENANT-ID",
+            //                 tokenCount: 1
+            //             },
+            //             {
+            //                 tenantId: "22222222-2222-2222-2222-222222222222",
+            //                 tokenCount: 1
+            //             }
+            //         ]
+            //     });
+            // }
+            return Promise.resolve({
+                tenants: getCachedTenants()
+            });
+        }
 
-
-browser.runtime.onMessage.addListener(async message =>{
-    if (message?.type !== "GET_TOKEN") return;
-    // console.log("received")
-    let token = getToken()
-    return {
-        bearer: token
+        if (message?.type === "GET_TOKEN") {
+            return Promise.resolve({
+                bearer: getTokenForTenant(message.tenantId)
+            });
+        }
+    } catch (error) {
+        return Promise.resolve({
+            error: error.message
+        });
     }
-})
+});

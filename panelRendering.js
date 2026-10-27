@@ -335,12 +335,8 @@ export function renderFavLinks(whereToRender, favoriteLinksList){
         let itemTypeDiv = document.createElement("div");
         itemTypeDiv.classList.add("item-type");
 
-        // show history
-        if (favLink.type === "DataPipeline" || favLink.type === 'SemanticModel'){
-            const historyButton = createHistoryIcon();
-            linkItemDiv.append(historyButton);
-        }
-
+        
+        
         if (favLink.type === "workspace") {
             itemTypeDiv.textContent = "Workspace";
         }
@@ -371,6 +367,13 @@ export function renderFavLinks(whereToRender, favoriteLinksList){
 
 
         linkItemDiv.append(linkItemAnch, renameLinkName, removeLinkButton);
+        // show history
+        if (favLink.type === "DataPipeline" || favLink.type === 'SemanticModel'){
+            const historyButton = createHistoryIcon();
+            linkItemDiv.append(historyButton);
+        }
+        linkItemDiv.append(renameLinkName, removeLinkButton);
+
 
         favLinkList.append(linkItemDiv);
 
@@ -830,30 +833,35 @@ function createJsonTree(obj) {
 }
 
 // b814ea87-0d04-4186-95b9-201efde32eca
-export function renderConnectionInfo(jsonMessage, getConnectionInfoDiv) {
-    // getConnectionInfoDiv.replaceChildren();
+export function renderBeautifiedJson(jsonMessage, getConnectionInfoDiv) {
+    let wrapper = getConnectionInfoDiv.querySelector(".json-viewer");
 
-    let wrapper = document.querySelector(".json-viewer")
     if (!wrapper) {
         wrapper = document.createElement("div");
         wrapper.classList.add("json-viewer");
+        getConnectionInfoDiv.appendChild(wrapper);
     }
-    else wrapper.replaceChildren();
-    
 
-    try {
-        const parsed =
-            typeof jsonMessage === "string"
-                ? JSON.parse(jsonMessage)
-                : jsonMessage;
+    wrapper.replaceChildren();
 
+    let parsed = jsonMessage;
+
+    // Parse only if the input is a string
+    if (typeof jsonMessage === "string") {
+        try {
+            parsed = JSON.parse(jsonMessage);
+        } catch {
+            wrapper.textContent = jsonMessage;
+            return;
+        }
+    }
+
+    // Render objects and arrays as an expandable tree
+    if (parsed !== null && typeof parsed === "object") {
         wrapper.appendChild(createJsonTree(parsed));
+    } else {
+        wrapper.textContent = String(parsed ?? "null");
     }
-    catch {
-        wrapper.textContent = jsonMessage;
-    }
-
-    getConnectionInfoDiv.appendChild(wrapper);
 }
 
 
@@ -889,6 +897,7 @@ export async function savePanelStates() {
     await browser.storage.local.set({
         ["fabrizioPanelStates"]: states
     });
+    console.log("states", states)
 }
 
 

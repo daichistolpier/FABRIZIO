@@ -5,29 +5,25 @@
 export async function getConnectionInfo(id, token) {
     if (!id) return null;
 
-    const getConnectionInfoURL = "https://api.fabric.microsoft.com/v1/connections/"
+    const url = `https://api.fabric.microsoft.com/v1/connections/${id}`;
 
-    const getConnectionInfoResponse = await fetch(getConnectionInfoURL + id,
-        {
-            headers: {
-                "Authorization": `Bearer ${token}`,
-            }
-        }
-    )
+    const response = await fetch(url, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 
-    const getConnectionJson = await getConnectionInfoResponse.json();
+    const data = await response.json();
 
-    if (!getConnectionInfoResponse.ok) {
-        const httpStatus = getConnectionInfoResponse.status;
-        const errorText = getConnectionJson.message ?? JSON.stringify(getConnectionJson);
-
-
-        return `HTTP Status ${httpStatus}\n${errorText}`
-
+    if (!response.ok) {
+        throw new Error(
+            `HTTP Status ${response.status}\n${
+                data.message ?? JSON.stringify(data)
+            }`
+        );
     }
-    
 
-    return getConnectionJson;
+    return data;
 }
 
 

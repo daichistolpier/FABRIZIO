@@ -40,7 +40,7 @@ import {
     renderLatestRuns,
     showFavItemHistoryRuns,
     renderNoFav,
-    renderConnectionInfo,
+    renderBeautifiedJson,
     restorePanelStates,
     savePanelStates,
     showAuthMessage
@@ -577,7 +577,7 @@ favContainer.addEventListener("click", async (e) => {
             await showFavItemHistoryRuns(itemContainer, token);
             break;
         }
-        case (e.target.classList.contains("error-info")): 
+        case (e.target.closest("button")?.classList.contains("info--fail--button")): 
             const failureDiv =
                 e.target
                     .closest(".run-history-item")
@@ -605,6 +605,21 @@ browser.storage.onChanged.addListener((changes, area) => {
         } else {
             renderFavLinks(favContainer, favoriteLinks);
         }
+
+        // Update the rendered objects using the latest favorites.
+        renderClickedObject(
+            "workspace",
+            selectedWs,
+            wsInfoContainer,
+            favoriteLinks
+        );
+
+        renderClickedObject(
+            "fabricItem",
+            selectedItems,
+            itemInfoContainer,
+            favoriteLinks
+        );
     }
 
     if (changes.fabrizioGlobalSearch) {
@@ -612,26 +627,63 @@ browser.storage.onChanged.addListener((changes, area) => {
 
         selectedWs = context?.workspace ?? null;
         selectedItems = context?.items ?? null;
+
+        // Re-render the clicked objects using the updated context.
+        if (selectedWs) {
+            renderClickedObject(
+                "workspace",
+                selectedWs,
+                wsInfoContainer,
+                favoriteLinks
+            );
+        } else {
+            wsInfoContainer.innerHTML = "";
+            wsFormInput.value = "";
+        }
+
+        if (selectedItems) {
+            renderClickedObject(
+                "fabricItem",
+                selectedItems,
+                itemInfoContainer,
+                favoriteLinks
+            );
+        } else {
+            itemInfoContainer.innerHTML = "";
+        }
     }
 });
 
 
 // GET CONNECTION INFO
-getConnectionInfoDiv.addEventListener("submit", async (e) =>{
+getConnectionInfoDiv.addEventListener("submit", async (e) => {
     e.preventDefault();
+
     if (!requireAuth(token)) return;
-    const inputValue = inputGetConnectionInfo.value;
-    if (inputValue.length  !== 36){
-        inputGetConnectionInfo.value = '';
+
+    const inputValue = inputGetConnectionInfo.value.trim();
+
+    if (inputValue.length !== 36) {
+        inputGetConnectionInfo.value = "";
         return;
     }
 
-    const jsonMessage = await getConnectionInfo(inputValue, token);
+    try {
+        const jsonMessage = await getConnectionInfo(inputValue, token);
 
-    renderConnectionInfo(jsonMessage, getConnectionInfoDiv)
+renderBeautifiedJson(jsonMessage, getConnectionInfoDiv);
+        renderBeautifiedJson(jsonMessage, getConnectionInfoDiv);
+    } catch (error) {
+        console.error("Could not get connection info:", error);
 
-    inputGetConnectionInfo.value = '';
-})
+        renderBeautifiedJson(
+            { error: error.message },
+            getConnectionInfoDiv
+        );
+    } finally {
+        inputGetConnectionInfo.value = "";
+    }
+});
 
 
 
@@ -674,13 +726,92 @@ jsonbeautifierForm.addEventListener("submit", (e) => {
 
     jsonBeautifierOutput.innerHTML = "";
 
-    renderConnectionInfo(input, jsonBeautifierOutput);
+    renderBeautifiedJson(input, jsonBeautifierOutput);
 });
 
 
-// panel cache
+// Refresh cached workspaces and items
+document.querySelectorAll(".refresh-cachedObj").forEach((button) => {
+    button.addEventListener("click", async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!requireAuth(token)) return;
+
+        // Refresh workspace list
+        if (button.closest(".workspace--header")) {
+            allWorkspaces = null;
+
+            allWorkspaces = await reloadWorkspaces();
+
+            if (Array.isArray(allWorkspaces)) {
+                renderFiltWsAndItems(
+                    allWorkspaces,
+                    wsFoundContainer,
+                    "fabricWs"
+                );
+            }
+
+            return;
+        }
+
+        // Refresh items for the currently selected workspace
+        if (button.closest(".item--header")) {
+            if (!selectedWs) return;
+
+            const workspaceId = selectedWs.id;
+
+            // Remove cached items for this workspace
+            itemsCache.delete(workspaceId);
+            allItems = null;
+
+            try {
+                // Fetch fresh items from Fabric
+                allItems = await getAllItemsFromWorkspace(
+                    workspaceId,
+                    token
+                );
+
+                itemsCache.set(workspaceId, allItems);
+
+                allItems.sort((a, b) =>
+                    a.displayName.localeCompare(b.displayName)
+                );
+
+                renderTypeFilters(
+                    itemTypeFilters,
+                    allItems,
+                    selectedTypeFilter
+                );
+
+                filterWsAndItems(
+                    allItems,
+                    itemFormInput,
+                    itemFoundContainer,
+                    "fabricItem",
+                    selectedTypeFilter,
+                    itemTypeFilters,
+                    true
+                );
+            } catch (error) {
+                console.error("Could not refresh workspace items:", error);
+
+                showAuthMessage(
+                    "Could not refresh workspace items. Please try again."
+                );
+            }
+        }
+    });
+});
+
+
+// Save panel states whenever a section is opened or closed
 document.querySelectorAll("details.panel-section").forEach(panel => {
     panel.addEventListener("toggle", savePanelStates);
 });
 
+// Restore previously saved states
 await restorePanelStates();
+await restorePanelStates();
+
+
