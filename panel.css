@@ -976,7 +976,7 @@ input[type="text"]:focus {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 4px 6px;
+    gap: 6px;
 
     min-width: 0;
     padding: 13px;
@@ -996,6 +996,23 @@ input[type="text"]:focus {
         background var(--transition),
         border-color var(--transition),
         box-shadow var(--transition);
+}
+
+.fabricItem--actions {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.fabricItem--actions img {
+    display: block;
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
 }
 
 .workspace--container:hover,
@@ -1041,6 +1058,15 @@ input[type="text"]:focus {
 } */
 /* Workspace actions */
 
+
+.fabricItem--container > h4 {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
 .workspace--container > .workspace--save {
     grid-column: 2;
     grid-row: 1;
@@ -1052,27 +1078,6 @@ input[type="text"]:focus {
 }
 
 
-/* The item link is moved to a new row on narrow grids by default.
-   On wider panels, the following layout accommodates all actions. */
-/* 
-.fabricItem--container {
-    grid-template-columns: minmax(0, 1fr) 34px 34px 34px;
-} */
-
-.fabricItem--container > .fabricItem--save {
-    /* grid-column: 2; */
-    grid-row: 1;
-}
-
-.fabricItem--container > .fabricItem--history {
-    /* grid-column: 3; */
-    grid-row: 1;
-}
-
-.fabricItem--container > a {
-    /* grid-column: 4; */
-    grid-row: 1;
-}
 
 /* Open-link icons */
 

@@ -204,9 +204,12 @@ export function renderClickedObject(fabricObjectType, item, whereToRender, favLi
         }
     }
     itemContainer.append(title);
-    if (favStarIcon) {itemContainer.append(favStarIcon);}
-    if (historyButton) {itemContainer.append(historyButton);}
-    if (goToAnchor) {itemContainer.append(goToAnchor);}
+    const fabricAction = document.createElement("div")
+    fabricAction.classList.add("fabricItem--actions")
+    if (favStarIcon) {fabricAction.append(favStarIcon);}
+    if (historyButton) {fabricAction.append(historyButton);}
+    if (goToAnchor) {fabricAction.append(goToAnchor);}
+    itemContainer.append(fabricAction);
     itemContainer.append(itemTypeDiv);
     itemContainer.append(IdDiv);
 
