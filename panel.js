@@ -604,15 +604,22 @@ browser.storage.onChanged.addListener((changes, area) => {
             renderNoFav(favContainer);
         } else {
             renderFavLinks(favContainer, favoriteLinks);
-            renderClickedObject(
-                "workspace",
-                selectedWs,
-                wsInfoContainer,
-                favoriteLinks
-            );
-            renderClickedObject("fabricItem", selectedItems, itemInfoContainer, favoriteLinks)
-
         }
+
+        // Update the rendered objects using the latest favorites.
+        renderClickedObject(
+            "workspace",
+            selectedWs,
+            wsInfoContainer,
+            favoriteLinks
+        );
+
+        renderClickedObject(
+            "fabricItem",
+            selectedItems,
+            itemInfoContainer,
+            favoriteLinks
+        );
     }
 
     if (changes.fabrizioGlobalSearch) {
@@ -620,6 +627,29 @@ browser.storage.onChanged.addListener((changes, area) => {
 
         selectedWs = context?.workspace ?? null;
         selectedItems = context?.items ?? null;
+
+        // Re-render the clicked objects using the updated context.
+        if (selectedWs) {
+            renderClickedObject(
+                "workspace",
+                selectedWs,
+                wsInfoContainer,
+                favoriteLinks
+            );
+        } else {
+            wsInfoContainer.innerHTML = "";
+        }
+
+        if (selectedItems) {
+            renderClickedObject(
+                "fabricItem",
+                selectedItems,
+                itemInfoContainer,
+                favoriteLinks
+            );
+        } else {
+            itemInfoContainer.innerHTML = "";
+        }
     }
 });
 

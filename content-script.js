@@ -67,6 +67,21 @@ function getTokenForTenant(tenantId) {
 browser.runtime.onMessage.addListener(message => {
     try {
         if (message?.type === "GET_TENANTS") {
+            // test
+            // if (message?.type === "GET_TENANTS") {
+            //     return Promise.resolve({
+            //         tenants: [
+            //             {
+            //                 tenantId: "YOUR-REAL-TENANT-ID",
+            //                 tokenCount: 1
+            //             },
+            //             {
+            //                 tenantId: "22222222-2222-2222-2222-222222222222",
+            //                 tokenCount: 1
+            //             }
+            //         ]
+            //     });
+            // }
             return Promise.resolve({
                 tenants: getCachedTenants()
             });
