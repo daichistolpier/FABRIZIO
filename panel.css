@@ -14,7 +14,7 @@
     --panel-mint: #edf7f3;
     --panel-hover: #e8f4ee;
 
-    --history-hover: #b8d3c3;
+    --history-hover: #bed4c7;
 
     --failure-box : #c7c7c7;
 
@@ -198,6 +198,7 @@ img {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
 
     margin: -14px -14px 0;
     padding: 25px 14px 27px;
@@ -545,11 +546,10 @@ h4 {
 
 .link--item--div .item-type {
     margin-top: 5px;
+    font-style: italic;
+
 }
 
-.item-type {
-    font-style: italic;
-}
 
 .fav--ws-name, .link--item--div .item-type{
     overflow: hidden;
@@ -675,7 +675,7 @@ h4 {
 .fabricItem--container a:hover::after,
 .button--rename--link:hover::after,
 .button--remove--link:hover::after,
-.button--refresh--history:hover::after {
+.button--refresh--history:hover::after{
     position: absolute;
     bottom: calc(100% + 8px);
     left: 50%;
@@ -719,6 +719,8 @@ h4 {
 .button--refresh--history:hover::after {
     content: "Refresh";
 }
+
+
 
 .status a:hover::after {
     content: "Go to run";
@@ -974,7 +976,7 @@ input[type="text"]:focus {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 4px 6px;
+    gap: 6px;
 
     min-width: 0;
     padding: 13px;
@@ -994,6 +996,23 @@ input[type="text"]:focus {
         background var(--transition),
         border-color var(--transition),
         box-shadow var(--transition);
+}
+
+.fabricItem--actions {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.fabricItem--actions img {
+    display: block;
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
 }
 
 .workspace--container:hover,
@@ -1039,6 +1058,15 @@ input[type="text"]:focus {
 } */
 /* Workspace actions */
 
+
+.fabricItem--container > h4 {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
 .workspace--container > .workspace--save {
     grid-column: 2;
     grid-row: 1;
@@ -1050,27 +1078,6 @@ input[type="text"]:focus {
 }
 
 
-/* The item link is moved to a new row on narrow grids by default.
-   On wider panels, the following layout accommodates all actions. */
-/* 
-.fabricItem--container {
-    grid-template-columns: minmax(0, 1fr) 34px 34px 34px;
-} */
-
-.fabricItem--container > .fabricItem--save {
-    grid-column: 2;
-    grid-row: 1;
-}
-
-.fabricItem--container > .fabricItem--history {
-    grid-column: 3;
-    grid-row: 1;
-}
-
-.fabricItem--container > a {
-    grid-column: 4;
-    grid-row: 1;
-}
 
 /* Open-link icons */
 
@@ -1272,7 +1279,7 @@ input[type="text"]:focus {
     width: 100%;
     box-sizing: border-box;
 
-    max-height: 100px;
+    /* max-height: 100px; */
     min-height: 40px;
     overflow: auto;
 
@@ -1539,4 +1546,34 @@ input[type="text"]:focus {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
     }
+}
+
+
+/* error page */
+
+
+.auth-notice {
+    margin: 15px;
+    padding: 12px 14px;
+     border: 1px solid var(--accent-border);
+    border-radius: var(--radius-md);
+    background: var(--panel-mint);
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.5;
+    text-align: center;
+    font-weight: 700;
+
+    /* Smooth transition */
+    transition: box-shadow 180ms ease, transform 180ms ease,
+                background-color 180ms ease;
+
+    /* Soft shadow */
+    box-shadow: 0 4px 12px rgba(120, 35, 35, 0.12),
+                0 1px 3px rgba(120, 35, 35, 0.08);
+}
+
+
+.auth-notice[hidden] {
+    display: none;
 }

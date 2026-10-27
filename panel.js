@@ -42,14 +42,17 @@ import {
     renderNoFav,
     renderConnectionInfo,
     restorePanelStates,
-    savePanelStates
+    savePanelStates,
+    showAuthMessage
 } from "./panelRendering.js"
 
-// GET TOKEN
-const token = await browser.runtime.sendMessage({
-    type: "GET_TOKEN"
-});
-console.log("Received tokenResponse", token)
+
+import {
+    updateAuthState,
+    requireAuth
+} from "./authentication.js"
+
+
 
 
 // VARS
@@ -61,7 +64,6 @@ let { fabrizioGlobalSearch: selectedContext = null} =
 let { fabrizioFavLinks : favoriteLinks = [] } = 
     await browser.storage.local.get("fabrizioFavLinks")
 
-
 let selectedWs = selectedContext?.workspace || null
 let selectedItems = selectedContext?.items || null;
 
@@ -70,6 +72,23 @@ let allWorkspaces = null;
 let allItems = null;
 itemFormInput.disabled = true;
 itemFormInput.placeholder = 'Select a workspace first...';
+
+// GET TOKEN ON PANEL INITIALIZATION
+let token = null;
+
+const auth = await browser.runtime.sendMessage({
+    type: "GET_TOKEN"
+});
+
+token = updateAuthState(auth, selectedWs);
+
+// RECEIVE AUTOMATIC AUTHENTICATION UPDATES
+browser.runtime.onMessage.addListener((message) => {
+    if (message.type !== "AUTH_STATE_CHANGED") return;
+
+    token = updateAuthState(message.auth, selectedWs);
+});
+
 
 // INIT VISUAL
 hideWsDropdown();
@@ -86,25 +105,44 @@ else {
 //// INIT WS
 if (selectedWs) {
     wsFoundContainer.innerHTML = "";
-    renderClickedObject("workspace", selectedWs, wsInfoContainer, favoriteLinks);
-    itemFormInput.disabled = false; //
-    itemFormInput.placeholder = "item..."
+
+    renderClickedObject(
+        "workspace",
+        selectedWs,
+        wsInfoContainer,
+        favoriteLinks
+    );
+
+    itemFormInput.disabled = !token;
+    itemFormInput.placeholder = "item...";
     itemFormContainer.style.display = "block";
 }
 
 /// INIT ITEMS
 if(selectedItems ){
-    console.log(selectedItems, "selectedItems")
     renderClickedObject("fabricItem", selectedItems, itemInfoContainer, favoriteLinks)
 }
 
 
-
-
 async function reloadWorkspaces(allWorkspaces){
     if (!allWorkspaces) {
-        allWorkspaces = await getAllWorkspaces(token);
-        allWorkspaces.sort((a,b) => a.displayName.localeCompare(b.displayName))
+        try {
+            allWorkspaces = await getAllWorkspaces(token);
+            allWorkspaces.sort((a, b) => a.displayName.localeCompare(b.displayName))
+        } catch (error) {
+            console.error("Could not load workspaces:", error);
+
+            if (error.message.startsWith("AUTH_REQUIRED") ||
+                error.message.startsWith("AUTH_EXPIRED")) {
+                showAuthMessage(
+                    "Open Microsoft Fabric and make sure you're signed in."
+                );
+                return;
+            }
+
+            showAuthMessage(error.message);
+
+        }
     }
     return allWorkspaces;
 }
@@ -112,6 +150,7 @@ async function reloadWorkspaces(allWorkspaces){
 // EVENT LISTENERS
 // WS FOCUS ON INPUT
 wsFormInput.addEventListener("focus", async (e) => {
+    if (!requireAuth(token)) return;
     // empty the selected items
     showWsDropdown();
     allWorkspaces = await reloadWorkspaces();
@@ -130,6 +169,7 @@ wsFormInput.addEventListener("focus", async (e) => {
 // WS INPUT WRITING
 wsFormInput.addEventListener("input", async (e) => {
     e.preventDefault();
+    if (!requireAuth(token)) return;
     if (!allWorkspaces) return;
 
     filterWsAndItems(allWorkspaces, wsFormInput, wsFoundContainer, "fabricWs", selectedTypeFilter);
@@ -137,6 +177,7 @@ wsFormInput.addEventListener("input", async (e) => {
 
 // WS CLICK ON WS OBJECT
 wsFoundContainer.addEventListener("click", async e =>{
+    if (!requireAuth(token)) return;
     if (!e.target.classList.contains("fabricWs")) return;
 
     selectedTypeFilter = "All";
@@ -170,7 +211,9 @@ wsFoundContainer.addEventListener("click", async e =>{
 
 // WS CLICK ON WS INFO SAVE BUTTON
 wsInfoContainer.addEventListener("click", async (e) => {
+    if (!requireAuth(token)) return;
     if (!e.target.closest("button")?.classList.contains("workspace--save")) return;
+
     e.preventDefault();
     const button = e.target.closest("button");
     const wsLink = button.parentElement.querySelector('a');
@@ -202,37 +245,80 @@ wsInfoContainer.addEventListener("click", async (e) => {
 // ITEMS 
 // LOAD ITEMS ON FOCUS
 itemFormInput.addEventListener("focus", async () => {
-    // ON FOCUS, LOAD EVERYHTING AND RENDER EVERYTHING AND EVERY ITEM TYPE
+    if (!requireAuth(token)) return;
     if (!selectedWs) return;
 
-    if (!itemsCache.has(selectedWs.id)) {
-        const items = await getAllItemsFromWorkspace(
-            selectedWs.id,
-            token
-        );
-        itemsCache.set(selectedWs.id, items);
+    const workspaceId = selectedWs.id;
+
+    // Load items if they aren't cached
+    if (!itemsCache.has(workspaceId)) {
+        try {
+            const items = await getAllItemsFromWorkspace(
+                workspaceId,
+                token
+            );
+            itemsCache.set(workspaceId, items);
+
+        } catch (error) {
+            console.error("Could not load items:", error);
+
+            if (
+                error.message.startsWith("AUTH_REQUIRED") ||
+                error.message.startsWith("AUTH_EXPIRED")
+            ) {
+                showAuthMessage(
+                    "Open Microsoft Fabric and make sure you're signed in."
+                );
+            } else if (error.message.startsWith("PERMISSION_DENIED")) {
+                showAuthMessage(
+                    "You don't have permission to access items in this workspace."
+                );
+            } else {
+                showAuthMessage(
+                    "Could not load workspace items. Please try again."
+                );
+            }
+
+            return;
+        }
     }
 
-    if (!allItems) {
-        allItems = itemsCache.get(selectedWs.id);
+    // Ensure items exist before rendering
+    allItems = itemsCache.get(workspaceId);
 
-        allItems.sort((a, b) =>
-            a.displayName.localeCompare(b.displayName)
-        );
+    if (!Array.isArray(allItems)) {
+        showAuthMessage("Could not load workspace items. Please try again.");
+        return;
     }
-    // render type filters
-    renderTypeFilters(itemTypeFilters, allItems, selectedTypeFilter);
 
-    // render filtered objects
-    // console.log("allItems", allItems, "selectedTypeFilter", selectedTypeFilter)
-    filterWsAndItems(allItems, itemFormInput, itemFoundContainer, "fabricItem", selectedTypeFilter,  itemTypeFilters, true);
+    allItems.sort((a, b) =>
+        a.displayName.localeCompare(b.displayName)
+    );
+
+    renderTypeFilters(
+        itemTypeFilters,
+        allItems,
+        selectedTypeFilter
+    );
+
+    filterWsAndItems(
+        allItems,
+        itemFormInput,
+        itemFoundContainer,
+        "fabricItem",
+        selectedTypeFilter,
+        itemTypeFilters,
+        true
+    );
+
     showItemDropdown();
     showTypeFilters();
-
 });
 
 // FILTER BY TYPING
 itemFormInput.addEventListener("input", () => {
+    if (!requireAuth(token)) return;
+    if (!selectedWs) return;
     filterWsAndItems(allItems, itemFormInput, itemFoundContainer, "fabricItem", selectedTypeFilter,  itemTypeFilters, true);
     // renderTypeFilters(itemTypeFilters, allItems, selectedTypeFilter);
 
@@ -240,8 +326,9 @@ itemFormInput.addEventListener("input", () => {
 
 // CLICK ON CHIPS
 itemTypeFilters.addEventListener("click", e => {
-    e.preventDefault();
+    if (!requireAuth(token)) return;
     if (e.target.tagName !== "BUTTON") return;
+    e.preventDefault();
     const button = e.target;
     itemTypeFilters
         .querySelectorAll("button")
@@ -254,6 +341,7 @@ itemTypeFilters.addEventListener("click", e => {
 
 // CLICK ON FOUND ITEMS TO GET INFO
 itemFoundContainer.addEventListener("click", async e =>{
+    if (!requireAuth(token)) return;
     const itemDiv = e.target.closest(".fabricItem");
     if (!itemDiv) return;
 
@@ -283,111 +371,170 @@ itemFoundContainer.addEventListener("click", async e =>{
 
 // CLICK ON ITEM INFO (SAVE AND HISTORY)
 itemInfoContainer.addEventListener("click", async (e) => {
-    // SAVE ITEM
-    if (e.target.closest("button")?.classList.contains("fabricItem--save")){
-        e.preventDefault();
-        const itemCtn = e.target.closest(".fabricItem--container")
-        const itemLink = itemCtn.parentElement.querySelector('a').href;
-        const itemName = itemCtn.parentElement.querySelector("h4");
-        // if ( favoriteLinks.find(item => item.url === itemLink) ) return;
-        if ( favoriteLinks.find(item => item.objectId === itemCtn.dataset.objectId && item.type === itemCtn.dataset.objectType ) ) return;
-        
-        // fill in star
-        const starIcon = itemCtn.querySelector(".save--star-icon")
-        console.log("starIcon", starIcon)
-        starIcon.src = chrome.runtime.getURL("img/starfill.png")
-        
-        allWorkspaces = await reloadWorkspaces();
+    const button = e.target.closest("button");
+    if (!button) return;
 
-        const workspaceName = allWorkspaces.find(item => {
-            return item.id === itemCtn.dataset.wsId;
-        } )
+    // SAVE ITEM
+    if (button.classList.contains("fabricItem--save")) {
+        e.preventDefault();
+        if (!requireAuth(token)) return;
+
+        const itemCtn = button.closest(".fabricItem--container");
+        if (!itemCtn) return;
+
+        const itemLink = itemCtn.querySelector("a")?.href;
+        const itemName = itemCtn.querySelector("h4");
+
+        if (!itemLink || !itemName) return;
+
+        const alreadySaved = favoriteLinks.find(item =>
+            item.objectId === itemCtn.dataset.objectId &&
+            item.type === itemCtn.dataset.objectType
+        );
+
+        if (alreadySaved) return;
+
+        allWorkspaces = await reloadWorkspaces();
+        if (!Array.isArray(allWorkspaces)) return;
+
+        const workspaceName = allWorkspaces.find(item =>
+            item.id === itemCtn.dataset.wsId
+        );
+
+        if (!workspaceName) {
+            showAuthMessage("Could not find the workspace. Please try again.");
+            return;
+        }
+
         favoriteLinks.push({
-            displayName : itemName.textContent,
-            type: itemCtn.dataset.objectType, 
+            displayName: itemName.textContent,
+            type: itemCtn.dataset.objectType,
             objectId: itemCtn.dataset.objectId,
             wsId: itemCtn.dataset.wsId,
             url: itemLink,
-            wsName : workspaceName.displayName
-        })
-    
-        await browser.storage.local.set({ "fabrizioFavLinks": favoriteLinks });
-        // renderFavLinks(favContainer, favoriteLinks);
-    }
-    //SEE ITEM HISTORY
-    else if (e.target.closest("button")?.classList.contains("fabricItem--history")
-        ||
-        e.target.closest("button")?.classList.contains("button--refresh--history")) {
-        e.preventDefault();
+            wsName: workspaceName.displayName
+        });
 
-        const button = e.target.closest("button");
+        await browser.storage.local.set({
+            fabrizioFavLinks: favoriteLinks
+        });
+
+        const starIcon = itemCtn.querySelector(".save--star-icon");
+        if (starIcon) {
+            starIcon.src = chrome.runtime.getURL("img/starfill.png");
+        }
+    }
+
+    // SEE ITEM HISTORY / REFRESH HISTORY
+    else if (
+        button.classList.contains("fabricItem--history") ||
+        button.classList.contains("button--refresh--history")
+    ) {
+        e.preventDefault();
+        if (!requireAuth(token)) return;
+
+        const isRefresh = button.classList.contains("button--refresh--history");
         button.classList.toggle("active");
 
-        const existingHistory = itemInfoContainer.querySelector(".run-history-container");
-        const noHistoryFound = itemInfoContainer.querySelector(".no--history--found");
+        const itemContainer =
+            itemInfoContainer.querySelector(".fabricItem--container");
 
-        const isRefresh =
-            e.target.closest("button")?.classList.contains(
-                "button--refresh--history"
-            );
+        if (!itemContainer) return;
+
+        const existingHistory =
+            itemInfoContainer.querySelector(".run-history-container");
+
+        const noHistoryFound =
+            itemInfoContainer.querySelector(".no--history--found");
 
         if (!isRefresh) {
             if (existingHistory) {
-                // existingHistory.hidden = !existingHistory.hidden;
                 existingHistory.classList.toggle("hidden");
                 return;
             }
+
             if (noHistoryFound) {
-                // noHistoryFound.hidden = !noHistoryFound.hidden;
                 noHistoryFound.classList.toggle("hidden");
                 return;
             }
-        }
-        else {
+        } else {
             existingHistory?.remove();
             noHistoryFound?.remove();
         }
-        
-        // const itemContainer = e.target.closest(".global--clicked-item").querySelector(".fabricItem--container");
-        const itemContainer =
-            itemInfoContainer.querySelector(
-                ".fabricItem--container"
-            );
 
         const workspaceId = itemContainer.dataset.wsId;
         const itemId = itemContainer.dataset.objectId;
         const objectType = itemContainer.dataset.objectType;
-        console.log("objectType", objectType)
-        const jobInstJson = await getJobInstance(workspaceId, itemId, objectType, token);
-        // console.log("jobInstJson", workspaceId, itemId, jobInstJson);
+
+        let jobInstJson;
+
+        try {
+            jobInstJson = await getJobInstance(
+                workspaceId,
+                itemId,
+                objectType,
+                token
+            );
+        } catch (error) {
+            console.error("Could not load item history:", error);
+
+            if (
+                error.message?.startsWith("AUTH_REQUIRED") ||
+                error.message?.startsWith("AUTH_EXPIRED")
+            ) {
+                showAuthMessage(
+                    "Open Microsoft Fabric and make sure you're signed in."
+                );
+            } else if (error.message?.startsWith("PERMISSION_DENIED")) {
+                showAuthMessage(
+                    "You don't have permission to access item history."
+                );
+            } else {
+                showAuthMessage(
+                    "Could not load item history. Please try again."
+                );
+            }
+
+            return;
+        }
 
         if (!jobInstJson?.value?.length) {
             const noHistFound = document.createElement("div");
             noHistFound.classList.add("no--history--found");
-            noHistFound.textContent = "No runs were found..."
-            itemInfoContainer.append(noHistFound)
-            // itemInfoDiv.append(noHistFound)
-            return
-        };
+            noHistFound.textContent = "No runs were found...";
+            itemInfoContainer.append(noHistFound);
+            return;
+        }
 
-        // render history runs
-        const runContainer = renderLatestRuns (jobInstJson, workspaceId, itemId, objectType)
-        if (runContainer) itemInfoContainer.append(runContainer);
+        const runContainer = renderLatestRuns(
+            jobInstJson,
+            workspaceId,
+            itemId,
+            objectType
+        );
 
-
+        if (runContainer) {
+            itemInfoContainer.append(runContainer);
+        }
     }
-    // SEE FAIL MESSAGE
-    else if (e.target.closest("button")?.classList.contains("info--fail--button")) {
+
+    // SEE FAILURE MESSAGE
+    else if (button.classList.contains("info--fail--button")) {
         e.preventDefault();
-        const failurediv = e.target.closest(".run-history-item").querySelector(".failure");
-        failurediv.hidden = !failurediv.hidden;
-    }
-    
-})
 
+        const failurediv = button
+            .closest(".run-history-item")
+            ?.querySelector(".failure");
+
+        if (failurediv) {
+            failurediv.hidden = !failurediv.hidden;
+        }
+    }
+});
 
 // FAVORITES
 favContainer.addEventListener("click", async (e) => {
+    if (!requireAuth(token)) return;
     switch (true) {
         case e.target.closest("button")?.classList.contains("button--remove--link"): {
             favoriteLinks = await removeFavLink(e, favoriteLinks, favContainer);
@@ -405,7 +552,6 @@ favContainer.addEventListener("click", async (e) => {
         }
         case e.target.closest("button")?.classList.contains("fabricItem--history"): {
             e.preventDefault();
-            console.log("click", e.target)
             const itemContainer = e.target.closest(".link--item--div");
             const button = e.target.closest("button");
             button.classList.toggle("active");
@@ -472,6 +618,7 @@ browser.storage.onChanged.addListener((changes, area) => {
 // GET CONNECTION INFO
 getConnectionInfoDiv.addEventListener("submit", async (e) =>{
     e.preventDefault();
+    if (!requireAuth(token)) return;
     const inputValue = inputGetConnectionInfo.value;
     if (inputValue.length  !== 36){
         inputGetConnectionInfo.value = '';
