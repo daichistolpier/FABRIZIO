@@ -3,7 +3,7 @@ import {
     getAllWorkspaces,
     getAllItemsFromWorkspace,
     getJobInstance
-} from "./fabricAPIs.js";
+} from "../modules/fabricAPIs.js";
 
 import {
     // container,
@@ -27,7 +27,7 @@ import {
     jsonBeautifierInput,
     jsonbeautifierDiv,
     jsonbeautifierForm
-} from "./selectors.js";
+} from "../modules/selectors.js";
 
 import {
     renderClickedObject,
@@ -43,14 +43,15 @@ import {
     renderBeautifiedJson,
     restorePanelStates,
     savePanelStates,
-    showAuthMessage
+    showAuthMessage,
+    reloadWorkspaces
 } from "./panelRendering.js"
 
 
 import {
     updateAuthState,
     requireAuth
-} from "./authentication.js"
+} from "../modules/authentication.js"
 
 
 
@@ -123,37 +124,13 @@ if(selectedItems ){
     renderClickedObject("fabricItem", selectedItems, itemInfoContainer, favoriteLinks)
 }
 
-
-async function reloadWorkspaces(allWorkspaces){
-    if (!allWorkspaces) {
-        try {
-            allWorkspaces = await getAllWorkspaces(token);
-            allWorkspaces.sort((a, b) => a.displayName.localeCompare(b.displayName))
-        } catch (error) {
-            console.error("Could not load workspaces:", error);
-
-            if (error.message.startsWith("AUTH_REQUIRED") ||
-                error.message.startsWith("AUTH_EXPIRED")) {
-                showAuthMessage(
-                    "Open Microsoft Fabric and make sure you're signed in."
-                );
-                return;
-            }
-
-            showAuthMessage(error.message);
-
-        }
-    }
-    return allWorkspaces;
-}
-
 // EVENT LISTENERS
 // WS FOCUS ON INPUT
 wsFormInput.addEventListener("focus", async (e) => {
     if (!requireAuth(token)) return;
     // empty the selected items
     showWsDropdown();
-    allWorkspaces = await reloadWorkspaces();
+    allWorkspaces = await reloadWorkspaces(allWorkspaces, token);
     renderFiltWsAndItems(allWorkspaces, wsFoundContainer, "fabricWs");
     allItems = null;
     itemFormInput.disabled = true;
@@ -215,7 +192,6 @@ wsInfoContainer.addEventListener("click", async (e) => {
     if (!e.target.closest("button")?.classList.contains("workspace--save")) return;
 
     e.preventDefault();
-    console.log(e.target)
     const button = e.target.closest("button");
     const wsLink = button.parentElement.querySelector('a');
     const wsName = button.parentElement.querySelector("h4");
@@ -227,7 +203,7 @@ wsInfoContainer.addEventListener("click", async (e) => {
     if ( favoriteLinks.find(item => item.objectId === wsId && item.type === "workspace") ) return;
     
     // change star color
-    button.querySelector("img").src = chrome.runtime.getURL("img/starfill.png")
+    button.querySelector("img").src = chrome.runtime.getURL("../img/starfill.png")
     
     //save to favorites
     favoriteLinks.push({
@@ -395,7 +371,7 @@ itemInfoContainer.addEventListener("click", async (e) => {
 
         if (alreadySaved) return;
 
-        allWorkspaces = await reloadWorkspaces();
+        allWorkspaces = await reloadWorkspaces(allWorkspaces, token);
         if (!Array.isArray(allWorkspaces)) return;
 
         const workspaceName = allWorkspaces.find(item =>
@@ -592,8 +568,91 @@ favContainer.addEventListener("click", async (e) => {
     }
 })
 
-// CACHE
 
+// GET CONNECTION INFO
+getConnectionInfoDiv.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (!requireAuth(token)) return;
+
+    const inputValue = inputGetConnectionInfo.value.trim();
+
+    if (inputValue.length !== 36) {
+        inputGetConnectionInfo.value = "";
+        return;
+    }
+
+    try {
+        const jsonMessage = await getConnectionInfo(inputValue, token);
+
+renderBeautifiedJson(jsonMessage, getConnectionInfoDiv);
+        renderBeautifiedJson(jsonMessage, getConnectionInfoDiv);
+    } catch (error) {
+        console.error("Could not get connection info:", error);
+
+        renderBeautifiedJson(
+            { error: error.message },
+            getConnectionInfoDiv
+        );
+    } finally {
+        inputGetConnectionInfo.value = "";
+    }
+});
+
+
+
+// CLOSE CARDS LISTENER
+document.addEventListener("mousedown", (e) => {
+    const insideWsSearch =
+        wsFormInput.contains(e.target) ||
+        wsFoundContainer.contains(e.target);
+
+    const insideItemSearch =
+        itemFormInput.contains(e.target) ||
+        itemFoundContainer.contains(e.target) ||
+        itemTypeFilters.contains(e.target);
+
+    if (!insideWsSearch) {
+        hideWsDropdown();
+    }
+
+    if (!insideItemSearch) {
+        hideItemDropdown();
+    }
+});
+
+// Save panel states whenever a section is opened or closed
+document.querySelectorAll("details.panel-section").forEach(panel => {
+    panel.addEventListener("toggle", savePanelStates);
+});
+
+// Restore previously saved states
+await restorePanelStates();
+await restorePanelStates();
+
+
+// JSON beautifier
+jsonbeautifierForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const input = jsonBeautifierInput.value.trim();
+
+    let jsonBeautifierOutput =
+        document.querySelector(".jsonBeautifier--output");
+
+    if (!jsonBeautifierOutput) {
+        jsonBeautifierOutput = document.createElement("div");
+        jsonBeautifierOutput.classList.add("jsonBeautifier--output");
+
+        jsonbeautifierDiv.appendChild(jsonBeautifierOutput);
+    }
+
+    jsonBeautifierOutput.innerHTML = "";
+
+    renderBeautifiedJson(input, jsonBeautifierOutput);
+});
+
+// CACHE HANDLING
 browser.storage.onChanged.addListener((changes, area) => {
     if (area !== "local") return;
 
@@ -653,83 +712,6 @@ browser.storage.onChanged.addListener((changes, area) => {
         }
     }
 });
-
-
-// GET CONNECTION INFO
-getConnectionInfoDiv.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    if (!requireAuth(token)) return;
-
-    const inputValue = inputGetConnectionInfo.value.trim();
-
-    if (inputValue.length !== 36) {
-        inputGetConnectionInfo.value = "";
-        return;
-    }
-
-    try {
-        const jsonMessage = await getConnectionInfo(inputValue, token);
-
-renderBeautifiedJson(jsonMessage, getConnectionInfoDiv);
-        renderBeautifiedJson(jsonMessage, getConnectionInfoDiv);
-    } catch (error) {
-        console.error("Could not get connection info:", error);
-
-        renderBeautifiedJson(
-            { error: error.message },
-            getConnectionInfoDiv
-        );
-    } finally {
-        inputGetConnectionInfo.value = "";
-    }
-});
-
-
-
-// CLOSE CARDS LISTENER
-document.addEventListener("mousedown", (e) => {
-    const insideWsSearch =
-        wsFormInput.contains(e.target) ||
-        wsFoundContainer.contains(e.target);
-
-    const insideItemSearch =
-        itemFormInput.contains(e.target) ||
-        itemFoundContainer.contains(e.target) ||
-        itemTypeFilters.contains(e.target);
-
-    if (!insideWsSearch) {
-        hideWsDropdown();
-    }
-
-    if (!insideItemSearch) {
-        hideItemDropdown();
-    }
-});
-
-
-// JSON beautifier
-jsonbeautifierForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const input = jsonBeautifierInput.value.trim();
-
-    let jsonBeautifierOutput =
-        document.querySelector(".jsonBeautifier--output");
-
-    if (!jsonBeautifierOutput) {
-        jsonBeautifierOutput = document.createElement("div");
-        jsonBeautifierOutput.classList.add("jsonBeautifier--output");
-
-        jsonbeautifierDiv.appendChild(jsonBeautifierOutput);
-    }
-
-    jsonBeautifierOutput.innerHTML = "";
-
-    renderBeautifiedJson(input, jsonBeautifierOutput);
-});
-
-
 // Refresh cached workspaces and items
 document.querySelectorAll(".refresh-cachedObj").forEach((button) => {
     button.addEventListener("click", async (e) => {
@@ -742,7 +724,7 @@ document.querySelectorAll(".refresh-cachedObj").forEach((button) => {
         if (button.closest(".workspace--header")) {
             allWorkspaces = null;
 
-            allWorkspaces = await reloadWorkspaces();
+            allWorkspaces = await reloadWorkspaces(allWorkspaces, token);
 
             if (Array.isArray(allWorkspaces)) {
                 renderFiltWsAndItems(
@@ -804,14 +786,5 @@ document.querySelectorAll(".refresh-cachedObj").forEach((button) => {
     });
 });
 
-
-// Save panel states whenever a section is opened or closed
-document.querySelectorAll("details.panel-section").forEach(panel => {
-    panel.addEventListener("toggle", savePanelStates);
-});
-
-// Restore previously saved states
-await restorePanelStates();
-await restorePanelStates();
 
 

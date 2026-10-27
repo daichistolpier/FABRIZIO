@@ -1,7 +1,10 @@
 import {
     getJobInstance
-    } from "./fabricAPIs.js";
+    } from "../modules/fabricAPIs.js";
 
+import {
+    getAllWorkspaces
+} from "../modules/fabricAPIs.js"
 
 const itemsWithHistory = ["DataPipeline", "SemanticModel"];
 const baseFabricUrl = 'https://app.fabric.microsoft.com/groups'
@@ -27,6 +30,28 @@ const fabricRoutes = {
 };
 
 
+export async function reloadWorkspaces(allWorkspaces, token){
+    if (!allWorkspaces) {
+        try {
+            allWorkspaces = await getAllWorkspaces(token);
+            allWorkspaces.sort((a, b) => a.displayName.localeCompare(b.displayName))
+        } catch (error) {
+            console.error("Could not load workspaces:", error);
+
+            if (error.message.startsWith("AUTH_REQUIRED") ||
+                error.message.startsWith("AUTH_EXPIRED")) {
+                showAuthMessage(
+                    "Open Microsoft Fabric and make sure you're signed in."
+                );
+                return;
+            }
+
+            showAuthMessage(error.message);
+
+        }
+    }
+    return allWorkspaces;
+}
 
 export async function removeFavLink(event, favoriteLinks, favContainer) {
     const button = event.target.closest("button");
@@ -832,7 +857,6 @@ function createJsonTree(obj) {
     return container;
 }
 
-// b814ea87-0d04-4186-95b9-201efde32eca
 export function renderBeautifiedJson(jsonMessage, getConnectionInfoDiv) {
     let wrapper = getConnectionInfoDiv.querySelector(".json-viewer");
 
@@ -866,7 +890,6 @@ export function renderBeautifiedJson(jsonMessage, getConnectionInfoDiv) {
 
 
 // panel states
-
 // Restore panel states from cache
 export async function restorePanelStates() {
     const { fabrizioPanelStates: states = {} } =
@@ -897,7 +920,6 @@ export async function savePanelStates() {
     await browser.storage.local.set({
         ["fabrizioPanelStates"]: states
     });
-    console.log("states", states)
 }
 
 

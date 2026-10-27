@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script defer src="panel.js" type="module"></script>
+    <script defer src="./panel.js" type="module"></script>
     <link rel="stylesheet" href="panel.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,13 +16,13 @@
 
 <body>
     <div class="title-wrapper">
-        <img src="img/logo.png" class="logo" />
+        <img src="../img/logo.png" class="logo" />
         <!-- <h1>FABRIZIO</h1> -->
     </div>
 
     <details class="panel-section" id="favorites">
         <summary>
-            <img src="img/star.svg" alt="" class="summary-icon">
+            <img src="../img/star.svg" alt="" class="summary-icon">
             <span>Favorites</span>
         </summary>
         <div class="favorites">
@@ -31,7 +31,7 @@
 
     <details open class="panel-section" id="global-search">
         <summary>
-            <img src="img/lens.svg" alt="" class="summary-icon">
+            <img src="../img/lens.svg" alt="" class="summary-icon">
             <span>Global search</span>
 
         </summary>
@@ -39,11 +39,11 @@
             <!-- <h3>Global Search</h3> -->
             <form class="global--ws">
                 <div class="workspace--header">
-                    <button class="refresh-cachedObj"><img src="img/refresh.png" alt="" class="refresh--icon"></button>
+                    <button class="refresh-cachedObj"><img src="../img/refresh.png" alt="" class="refresh--icon"></button>
                     <h3>Workspace</h3>
                     </div>
                 <div class="search-input-wrapper">
-                    <img src="img/lens.svg" alt="" class="search-input-icon">
+                    <img src="../img/lens.svg" alt="" class="search-input-icon">
                     <input type="text" placeholder="workspace..." class="input--global--ws">
                 </div>
                 <div class="global--found-ws"></div>
@@ -56,11 +56,11 @@
             <form class="global--item item--hidden">
                 <!-- <form class="global--item" style="display: none;"> -->
                 <div class="item--header">
-                    <button class="refresh-cachedObj"><img src="img/refresh.png" alt="" class="refresh--icon"></button>
+                    <button class="refresh-cachedObj"><img src="../img/refresh.png" alt="" class="refresh--icon"></button>
                     <h3>Item</h3>
                     </div>
                 <div class="search-input-wrapper">
-                    <img src="img/lens.svg" alt="" class="search-input-icon">
+                    <img src="../img/lens.svg" alt="" class="search-input-icon">
                     <input type="text" placeholder="item..." class="input--global--item">
                 </div>
                 <div class="item-type-filters"></div>
@@ -72,7 +72,7 @@
 
     <details class="panel-section" id="utilities">
         <summary>
-            <img src="img/utilities.svg" alt="" class="summary-icon">
+            <img src="../img/utilities.svg" alt="" class="summary-icon">
             <span>Utilites</span>
         </summary>
         <details class="panel-getConnectionInfo">

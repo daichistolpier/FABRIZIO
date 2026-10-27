@@ -1,4 +1,3 @@
-console.log("[Fabrizio] Content script loaded:", location.href);
 const POWERBI_SCOPE =
     "https://analysis.windows.net/powerbi/api/.default";
 
