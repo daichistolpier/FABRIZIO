@@ -604,6 +604,14 @@ browser.storage.onChanged.addListener((changes, area) => {
             renderNoFav(favContainer);
         } else {
             renderFavLinks(favContainer, favoriteLinks);
+            renderClickedObject(
+                "workspace",
+                selectedWs,
+                wsInfoContainer,
+                favoriteLinks
+            );
+            renderClickedObject("fabricItem", selectedItems, itemInfoContainer, favoriteLinks)
+
         }
     }
 
