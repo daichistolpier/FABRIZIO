@@ -58,3 +58,4 @@ export function updateAuthState(auth, selectedWs = null) {
     console.log("token", token)
     return token;
 }
+
