@@ -215,6 +215,7 @@ wsInfoContainer.addEventListener("click", async (e) => {
     if (!e.target.closest("button")?.classList.contains("workspace--save")) return;
 
     e.preventDefault();
+    console.log(e.target)
     const button = e.target.closest("button");
     const wsLink = button.parentElement.querySelector('a');
     const wsName = button.parentElement.querySelector("h4");

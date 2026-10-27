@@ -203,9 +203,9 @@ export function renderClickedObject(fabricObjectType, item, whereToRender, favLi
             ({favStarIcon, goToAnchor} = createSaveIcon(fabricObjectType, fullFabricUrl, favLinkList, item.id ));
         }
     }
-    itemContainer.append(title);
     const fabricAction = document.createElement("div")
     fabricAction.classList.add("fabricItem--actions")
+    fabricAction.append(title);
     if (favStarIcon) {fabricAction.append(favStarIcon);}
     if (historyButton) {fabricAction.append(historyButton);}
     if (goToAnchor) {fabricAction.append(goToAnchor);}

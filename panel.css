@@ -999,20 +999,38 @@ input[type="text"]:focus {
 }
 
 .fabricItem--actions {
-    grid-column: 2;
-    grid-row: 1;
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 4px;
-    flex-shrink: 0;
+    min-width: 0;
+    width: 100%;
 }
 
-.fabricItem--actions img {
-    display: block;
-    width: 16px;
-    height: 16px;
-    object-fit: contain;
+.fabricItem--actions h4 {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 650;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+    text-align: left;
+}
+
+.fabricItem--actions button,
+.fabricItem--actions > a {
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+}
+
+/* Keep icons centered inside their controls */
+.fabricItem--actions button,
+.fabricItem--actions > a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .workspace--container:hover,
@@ -1024,7 +1042,7 @@ input[type="text"]:focus {
 
 /* Name stays on the left */
 
-.workspace--container h4,
+/* .workspace--container h4,
 .fabricItem--container h4 {
     grid-column: 1;
     grid-row: 1;
@@ -1033,7 +1051,7 @@ input[type="text"]:focus {
     overflow-wrap: anywhere;
 
     font-size: 14px;
-}
+} */
 
 /* Workspace ID / item ID */
 
@@ -1067,15 +1085,15 @@ input[type="text"]:focus {
     overflow-wrap: anywhere;
 }
 
-.workspace--container > .workspace--save {
+/* .workspace--container > .workspace--save {
     grid-column: 2;
     grid-row: 1;
-}
+} */
 
-.workspace--container > a {
+/* .workspace--container > a {
     grid-column: 3;
     grid-row: 1;
-}
+} */
 
 
 
