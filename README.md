@@ -1,3 +1,4 @@
+
 # FABRIZIO
 
 ### Your Microsoft Fabric workspace, under control.
@@ -14,11 +15,7 @@ Find workspaces and items, access run history, manage your favorites, and simpli
 
 ## 🎬 Demo
 
-<p align="center">
-  <a href="https://github.com/user-attachments/assets/bfffda73-f57e-48da-bd5a-05f62c9660d8">
-    <img src="./DEMO/Demo_short_git.mp4" alt="Watch the Fabrizio demo" width="800">
-  </a>
-</p>
+https://github.com/user-attachments/assets/ab7b769c-4c6c-4e32-b034-5cb5948205ab
 
 <p align="center">
   <em>See Fabrizio in action.</em>
@@ -26,40 +23,37 @@ Find workspaces and items, access run history, manage your favorites, and simpli
 
 ---
 
-## 💡 Why Fabrizio?
+## Why Fabrizio?
 
-Fabrizio started as a small automation tool to speed up repetitive tasks during my company's migration to Microsoft Fabric.
-
-What began as a practical solution evolved into a lightweight productivity assistant, designed to keep frequently used resources and useful utilities within easy reach.
-
+Fabrizio was born as a small automation tool to speed up repetitive tasks during my company's migration to Microsoft Fabric.
 Fabrizio is designed primarily as a **single-tenant assistant**, while supporting multiple tenants when needed.
 
-## ✨ Features
+## Features
 
-### ⭐ Favorites
+### Favorites
 - Save frequently used Fabric workspaces and items.
 - Access your favorite resources from a centralized list.
 
-### 🔎 Workspace & Item Search
+### Workspace & Item Search
 - Quickly find workspaces and Fabric items.
 - Navigate your Fabric environment directly from the side panel.
 
-### 📊 Run History
+### Run History
 - Inspect available execution history for supported Fabric items.
 - Review run details and statuses.
 - Navigate directly to job instances.
 
-### 🔌 Connection Information
+### Connection Information
 - Access Microsoft Fabric connection information.
 - Simplify troubleshooting and development workflows.
 
-### 🧰 Developer Utilities
+### <developer Utilities
 - Beautify JSON for improved readability.
 - Keep useful development tools close at hand while working in Fabric.
 
 ---
 
-## 📦 Installation
+## Installation
 
 Fabrizio is currently distributed as a browser extension project and can be loaded locally in a Chromium-based browser.
 
@@ -72,7 +66,7 @@ Fabrizio is currently distributed as a browser extension project and can be load
 
 > **Note:** You must be signed in to Microsoft Fabric to use features that require authentication. Access to workspaces and items depends on your account's permissions.
 
-## 🛠️ Technology
+## Technology
 
 Fabrizio is built using:
 
@@ -82,7 +76,7 @@ Fabrizio is built using:
 - **Chrome Extension Manifest V3** — browser extension architecture
 - **Microsoft Fabric APIs** — workspace, item, and execution data
 
-## 🔐 Authentication & Permissions
+## Authentication & Permissions
 
 Fabrizio works within your existing Microsoft Fabric environment and uses the access available to your signed-in account.
 
@@ -94,14 +88,17 @@ Before installing, review the source code and `manifest.json` to understand the 
 
 ---
 
-## 📄 License
+## Project Status
 
-This project is licensed under the [MIT License](LICENSE).
+**Fabrizio is no longer actively maintained.**
 
----
+This project was originally developed to simplify repetitive tasks while working with Microsoft Fabric at my company. However, the company has since disabled browser extensions, meaning I can no longer use Fabrizio in my work environment or continue developing and testing it (especially with multi-tenant solutions).
 
-<p align="center">
-  <strong>Built to make Microsoft Fabric workflows simpler.</strong>
-  <br>
-  <em>Less searching. Less clicking. More doing.</em>
-</p>
+As a result, **I won't be able to provide further updates, bug fixes, or new features**.
+
+The repository remains public for anyone interested in exploring, using, or adapting the project. Contributions and community-maintained forks are welcome, but I cannot guarantee ongoing support or compatibility with future Microsoft Fabric updates.
+
+## License
+
+This project is licensed under the MIT License.
+
