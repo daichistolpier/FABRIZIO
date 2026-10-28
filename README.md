@@ -5,7 +5,7 @@
 
 **Fabrizio** is a browser extension that helps you navigate Microsoft Fabric faster by bringing essential tools into a convenient side panel.
 
-Find workspaces and items, access run history, manage your favorites, and simplify repetitive tasks — without constantly switching between pages.
+Find workspaces and items, access run history, manage your favorites, and simplify repetitive tasks.
 
 <p align="center">
   <img src="img/logo.png" alt="Fabrizio logo" width="260">
@@ -13,7 +13,7 @@ Find workspaces and items, access run history, manage your favorites, and simpli
 
 ---
 
-## 🎬 Demo
+## Demo
 
 https://github.com/user-attachments/assets/ab7b769c-4c6c-4e32-b034-5cb5948205ab
 
@@ -25,8 +25,8 @@ https://github.com/user-attachments/assets/ab7b769c-4c6c-4e32-b034-5cb5948205ab
 
 ## Why Fabrizio?
 
-Fabrizio was born as a small automation tool to speed up repetitive tasks during my company's migration to Microsoft Fabric.
-Fabrizio is designed primarily as a **single-tenant assistant**, while supporting multiple tenants when needed.
+Fabrizio was born as a small automation tool to speed up repetitive tasks during my company's migration to Microsoft Fabric (e.g., listing current items in workspaces, viewing history of frequently monitored pipelines, see refresh histories, ...).
+Fabrizio is designed as a **single-tenant assistant**, however it can also support multiple tenants when needed.
 
 ## Features
 
@@ -42,15 +42,14 @@ Fabrizio is designed primarily as a **single-tenant assistant**, while supportin
 - Inspect available execution history for supported Fabric items.
 - Review run details and statuses.
 - Navigate directly to job instances.
+> The history feature was developed mainly for the DataPipelines (semantic-model refresh were not the main focus)
 
 ### Connection Information
 - Access Microsoft Fabric connection information.
 - Simplify troubleshooting and development workflows.
 
-### <developer Utilities
-- Beautify JSON for improved readability.
-- Keep useful development tools close at hand while working in Fabric.
-
+### Developer Utilities
+- Beautify JSON for improved readability of Fabric messages
 ---
 
 ## Installation
