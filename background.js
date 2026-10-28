@@ -57,7 +57,7 @@ async function sendToFabricTab(tabId, url, message) {
     }
 
     // Use the native Chrome/Edge scripting API.
-    await chrome.scripting.executeScript({
+    await browser.scripting.executeScript({
         target: { tabId },
         files: ["content-script.js"]
     });

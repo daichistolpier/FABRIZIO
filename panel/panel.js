@@ -1,12 +1,10 @@
 import {
     getConnectionInfo,
-    getAllWorkspaces,
     getAllItemsFromWorkspace,
     getJobInstance
 } from "../modules/fabricAPIs.js";
 
 import {
-    // container,
     inputGetConnectionInfo,
     getConnectionInfoDiv,
     wsFormInput,
@@ -59,11 +57,13 @@ import {
 // VARS
 const itemsCache = new Map();
 
-let { fabrizioGlobalSearch: selectedContext = null} = 
-    await browser.storage.local.get("fabrizioGlobalSearch");
-
-let { fabrizioFavLinks : favoriteLinks = [] } = 
-    await browser.storage.local.get("fabrizioFavLinks")
+const {
+    fabrizioGlobalSearch: selectedContext = null,
+    fabrizioFavLinks: favoriteLinks = []
+} = await browser.storage.local.get([
+    "fabrizioGlobalSearch",
+    "fabrizioFavLinks"
+]);
 
 let selectedWs = selectedContext?.workspace || null
 let selectedItems = selectedContext?.items || null;
@@ -203,7 +203,7 @@ wsInfoContainer.addEventListener("click", async (e) => {
     if ( favoriteLinks.find(item => item.objectId === wsId && item.type === "workspace") ) return;
     
     // change star color
-    button.querySelector("img").src = chrome.runtime.getURL("../img/starfill.png")
+    button.querySelector("img").src = browser.runtime.getURL("../img/starfill.png")
     
     //save to favorites
     favoriteLinks.push({
@@ -297,7 +297,6 @@ itemFormInput.addEventListener("input", () => {
     if (!requireAuth(token)) return;
     if (!selectedWs) return;
     filterWsAndItems(allItems, itemFormInput, itemFoundContainer, "fabricItem", selectedTypeFilter,  itemTypeFilters, true);
-    // renderTypeFilters(itemTypeFilters, allItems, selectedTypeFilter);
 
 });
 
@@ -339,7 +338,6 @@ itemFoundContainer.addEventListener("click", async e =>{
 
     itemFormInput.value = '';
     selectedTypeFilter = "All";
-    // itemFormInput.value = name;
     hideItemDropdown();
 
 
@@ -398,7 +396,7 @@ itemInfoContainer.addEventListener("click", async (e) => {
 
         const starIcon = itemCtn.querySelector(".save--star-icon");
         if (starIcon) {
-            starIcon.src = chrome.runtime.getURL("img/starfill.png");
+            starIcon.src = browser.runtime.getURL("img/starfill.png");
         }
     }
 
@@ -470,25 +468,21 @@ itemInfoContainer.addEventListener("click", async (e) => {
 
             showAuthMessage(message);
 
-            // Scroll to the top of the page.
             window.scrollTo({
                 top: 0,
                 behavior: "smooth"
             });
 
-            // Remove the error message after 3 seconds,
-            // but only for the generic loading error.
+
             if (message === "Could not load item history. Please try again.") {
                 button.classList.toggle("active");
                 setTimeout(() => {
-                    // Adjust this selector to match the element created by showAuthMessage().
                     const errorElement = document.querySelector(".auth-notice");
 
                     if (errorElement) {
                         errorElement.remove();
                     }
 
-                    // Ensure the page is back at the top.
                     window.scrollTo({
                         top: 0,
                         behavior: "smooth"
@@ -610,7 +604,6 @@ getConnectionInfoDiv.addEventListener("submit", async (e) => {
         const jsonMessage = await getConnectionInfo(inputValue, token);
 
         renderBeautifiedJson(jsonMessage, getConnectionInfoDiv);
-        renderBeautifiedJson(jsonMessage, getConnectionInfoDiv);
     } catch (error) {
         console.error("Could not get connection info:", error);
 
@@ -689,7 +682,6 @@ browser.storage.onChanged.addListener((changes, area) => {
             renderFavLinks(favContainer, favoriteLinks);
         }
 
-        // Update the rendered objects using the latest favorites.
         renderClickedObject(
             "workspace",
             selectedWs,
@@ -711,7 +703,6 @@ browser.storage.onChanged.addListener((changes, area) => {
         selectedWs = context?.workspace ?? null;
         selectedItems = context?.items ?? null;
 
-        // Re-render the clicked objects using the updated context.
         if (selectedWs) {
             renderClickedObject(
                 "workspace",
@@ -736,7 +727,6 @@ browser.storage.onChanged.addListener((changes, area) => {
         }
     }
 });
-// Refresh cached workspaces and items
 document.querySelectorAll(".refresh-cachedObj").forEach((button) => {
     button.addEventListener("click", async (e) => {
         e.preventDefault();
@@ -744,7 +734,6 @@ document.querySelectorAll(".refresh-cachedObj").forEach((button) => {
 
         if (!requireAuth(token)) return;
 
-        // Refresh workspace list
         if (button.closest(".workspace--header")) {
             allWorkspaces = null;
 
@@ -761,18 +750,15 @@ document.querySelectorAll(".refresh-cachedObj").forEach((button) => {
             return;
         }
 
-        // Refresh items for the currently selected workspace
         if (button.closest(".item--header")) {
             if (!selectedWs) return;
 
             const workspaceId = selectedWs.id;
 
-            // Remove cached items for this workspace
             itemsCache.delete(workspaceId);
             allItems = null;
 
             try {
-                // Fetch fresh items from Fabric
                 allItems = await getAllItemsFromWorkspace(
                     workspaceId,
                     token
