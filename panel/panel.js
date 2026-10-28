@@ -455,21 +455,45 @@ itemInfoContainer.addEventListener("click", async (e) => {
         } catch (error) {
             console.error("Could not load item history:", error);
 
+            let message;
+
             if (
                 error.message?.startsWith("AUTH_REQUIRED") ||
                 error.message?.startsWith("AUTH_EXPIRED")
             ) {
-                showAuthMessage(
-                    "Open Microsoft Fabric and make sure you're signed in."
-                );
+                message = "Open Microsoft Fabric and make sure you're signed in.";
             } else if (error.message?.startsWith("PERMISSION_DENIED")) {
-                showAuthMessage(
-                    "You don't have permission to access item history."
-                );
+                message = "You don't have permission to access item history.";
             } else {
-                showAuthMessage(
-                    "Could not load item history. Please try again."
-                );
+                message = "Could not load item history. Please try again.";
+            }
+
+            showAuthMessage(message);
+
+            // Scroll to the top of the page.
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+            // Remove the error message after 3 seconds,
+            // but only for the generic loading error.
+            if (message === "Could not load item history. Please try again.") {
+                button.classList.toggle("active");
+                setTimeout(() => {
+                    // Adjust this selector to match the element created by showAuthMessage().
+                    const errorElement = document.querySelector(".auth-notice");
+
+                    if (errorElement) {
+                        errorElement.remove();
+                    }
+
+                    // Ensure the page is back at the top.
+                    window.scrollTo({
+                        top: 0,
+                        behavior: "smooth"
+                    });
+                }, 3000);
             }
 
             return;
@@ -585,7 +609,7 @@ getConnectionInfoDiv.addEventListener("submit", async (e) => {
     try {
         const jsonMessage = await getConnectionInfo(inputValue, token);
 
-renderBeautifiedJson(jsonMessage, getConnectionInfoDiv);
+        renderBeautifiedJson(jsonMessage, getConnectionInfoDiv);
         renderBeautifiedJson(jsonMessage, getConnectionInfoDiv);
     } catch (error) {
         console.error("Could not get connection info:", error);

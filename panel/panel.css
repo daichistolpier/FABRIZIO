@@ -712,6 +712,32 @@ h4 {
     transform: scale(0.94);
 }
 
+.workspace--save:disabled,
+.fabricItem--save:disabled {
+    cursor: default;
+    opacity: 0.6;
+}
+
+.fabricItem--save:disabled img,
+.workspace--save:disabled img {
+    opacity: 0.65;
+    filter: grayscale(30%);
+}
+
+/* Optional: no hover effect when disabled */
+.fabricItem--save:disabled:hover,
+.workspace--save:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.fabricItem--save:disabled:hover::after,
+.fabricItem--save:disabled:hover::before,
+.workspace--save:disabled:hover::after,
+.workspace--save:disabled:hover::before {
+    display: none;
+}
+
 .fabricItem--history.active,
 .fabricItem--history:active {
     color: #fff;

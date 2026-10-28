@@ -254,12 +254,15 @@ function createSaveIcon(type, fullFabricUrl, favLinkList, itemId) {
         item => item.objectId === itemId
     )
     if (foundInFav) {
-        starImg.classList.add("saved")
+        starImg.classList.add("saved");
+        starImg.classList.remove("not-saved");
         starImg.src = chrome.runtime.getURL("img/starfill.png");
-    }
-    else {
-        starImg.classList.add("not-saved")
+        favStarIcon.disabled = true;
+    } else {
+        starImg.classList.add("not-saved");
+        starImg.classList.remove("saved");
         starImg.src = chrome.runtime.getURL("img/star.png");
+        favStarIcon.disabled = false;
     }
 
     starImg.alt = "Save to favorites";
@@ -473,13 +476,60 @@ export async function showFavItemHistoryRuns(itemContainer, token) {
     const workspaceId = itemContainer.dataset.wsId;
     const itemId = itemContainer.dataset.objectId;
     const objectType = itemContainer.dataset.type;
+    let jobInstJson;
+    try {
+        jobInstJson = await getJobInstance(
+            workspaceId,
+            itemId,
+            objectType,
+            token
+        );
+    } catch (error) {
+        console.error("Could not load item history:", error);
 
-    const jobInstJson = await getJobInstance(
-        workspaceId,
-        itemId,
-        objectType,
-        token
-    );
+        let message;
+
+        if (
+            error.message?.startsWith("AUTH_REQUIRED") ||
+            error.message?.startsWith("AUTH_EXPIRED")
+        ) {
+            message = "Open Microsoft Fabric and make sure you're signed in.";
+        } else if (error.message?.startsWith("PERMISSION_DENIED")) {
+            message = "You don't have permission to access item history.";
+        } else {
+            message = "Could not load item history. Please try again.";
+        }
+
+        showAuthMessage(message);
+
+        // Scroll to the top of the page.
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+        // Remove the error message after 3 seconds,
+        // but only for the generic loading error.
+        if (message === "Could not load item history. Please try again.") {
+            itemContainer.querySelector("button").classList.toggle("active");
+            setTimeout(() => {
+                // Adjust this selector to match the element created by showAuthMessage().
+                const errorElement = document.querySelector(".auth-notice");
+
+                if (errorElement) {
+                    errorElement.remove();
+                }
+
+                // Ensure the page is back at the top.
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+            }, 3000);
+        }
+
+        return;
+    }
 
     if (!jobInstJson?.value?.length) {
         const noHistFound = document.createElement("div");
