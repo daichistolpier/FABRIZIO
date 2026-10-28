@@ -1,6 +1,6 @@
 import {
     showAuthMessage
-} from "./panelRendering.js"
+} from "../panel/panelRendering.js"
 
 import {
     hideWsDropdown, 
@@ -44,7 +44,6 @@ export function updateAuthState(auth, selectedWs = null) {
 
     itemFormInput.disabled = !authenticated;
     inputGetConnectionInfo.disabled = !authenticated;
-    console.log("item form disables")
 
     if (!authenticated) {
         hideWsDropdown();
@@ -55,7 +54,6 @@ export function updateAuthState(auth, selectedWs = null) {
             ? "item..."
             : "Select a workspace first...";
     }
-    console.log("token", token)
     return token;
 }
 
