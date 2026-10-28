@@ -1,7 +1,7 @@
 
 # FABRIZIO
 
-### Your Microsoft Fabric workspace, under control.
+### Your Microsoft Fabric assistant
 
 **Fabrizio** is a browser extension that helps you navigate Microsoft Fabric faster by bringing essential tools into a convenient side panel.
 
