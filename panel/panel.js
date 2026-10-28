@@ -57,7 +57,7 @@ import {
 // VARS
 const itemsCache = new Map();
 
-const {
+let {
     fabrizioGlobalSearch: selectedContext = null,
     fabrizioFavLinks: favoriteLinks = []
 } = await browser.storage.local.get([
