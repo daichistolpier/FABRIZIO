@@ -53,7 +53,6 @@ html {
     min-width: 280px;
     min-height: 100%;
     background: var(--bg-deep);
-    overflow-x: clip;
 }
 
 body {
@@ -1629,4 +1628,23 @@ input[type="text"]:focus {
 
 .auth-notice[hidden] {
     display: none;
+}
+
+/* Keep icon tooltips visible */
+.workspace--container,
+.fabricItem--container,
+.link--item--div {
+    overflow: visible;
+}
+
+.workspace--save,
+.fabricItem--save,
+.fabricItem--history,
+.button--rename--link,
+.button--remove--link,
+.button--refresh--history,
+.refresh-cachedObj,
+.workspace--container > a,
+.fabricItem--container > a {
+    position: relative;
 }
