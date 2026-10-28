@@ -146,3 +146,34 @@ tenantSelect.addEventListener("change", async () => {
 refreshButton.addEventListener("click", loadTenants);
 
 loadTenants();
+
+document.querySelector("#resetCache").addEventListener("click", async () => {
+    const confirmed = confirm(
+        "Are you sure you want to reset Fabrizio's cache? This will remove favorites, search history, panel states, and the selected tenant."
+    );
+
+    if (!confirmed) return;
+
+    try {
+        await browser.storage.local.remove([
+            "fabrizioFavLinks",
+            "fabrizioGlobalSearch",
+            "fabrizioPanelStates",
+            "fabrizioTenantId"
+        ]);
+
+        console.log("Fabrizio cache reset successfully.");
+
+        const status = document.querySelector("#status");
+        if (status) {
+            status.textContent = "Cache reset successfully.";
+        }
+    } catch (error) {
+        console.error("Failed to reset Fabrizio cache:", error);
+
+        const status = document.querySelector("#status");
+        if (status) {
+            status.textContent = "Failed to reset cache.";
+        }
+    }
+});

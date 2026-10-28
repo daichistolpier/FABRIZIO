@@ -1,6 +1,6 @@
 {
     "manifest_version" : 3,
-    "name" : "Fabrizio: your fabric assistant",
+    "name" : "Fabrizio: your Microsoft Fabric assistant",
     "version" : "1.0.0",
     "icons": {
     "16": "img/moustache.png",

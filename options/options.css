@@ -101,3 +101,20 @@ select {
   margin-bottom: 0;
   font-size: 13px;
 }
+
+.settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+#resetCache {
+  background: #fff;
+  color: #b42318;
+  border: 1px solid #e5b8b5;
+}
+
+#resetCache:hover {
+  background: #fdf0ef;
+}

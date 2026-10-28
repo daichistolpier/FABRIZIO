@@ -515,6 +515,11 @@ h4 {
     border-top: 1px solid var(--border);
 }
 
+.run-history-container.hidden,
+.run-history-container[hidden] {
+    display: none !important;
+}
+
 .link--item--a {
     display: flex;
     flex: 1 1 0%;

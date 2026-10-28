@@ -51,7 +51,7 @@ export function updateAuthState(auth, selectedWs = null) {
         hideTypeFilters();
     } else {
         itemFormInput
-            ? "item..."
+            ? "item or id..."
             : "Select a workspace first...";
     }
     return token;
