@@ -25,24 +25,24 @@ https://github.com/user-attachments/assets/ab7b769c-4c6c-4e32-b034-5cb5948205ab
 
 ## Why Fabrizio?
 
-Fabrizio was born as a small automation tool to speed up repetitive tasks during my company's migration to Microsoft Fabric (e.g., listing current items in workspaces, viewing history of frequently monitored pipelines, see refresh histories, ...).
+Fabrizio was born as a small independent automation tool to speed up repetitive tasks during my company's migration to Microsoft Fabric (e.g., listing current items in workspaces, viewing history of frequently monitored pipelines and debugging them, ...).
 Fabrizio is designed as a **single-tenant assistant**, however it can also support multiple tenants when needed.
 
 ## Features
 
 ### Favorites
 - Save frequently used Fabric workspaces and items.
-- Access your favorite resources from a centralized list.
+- Access your favorite resources from a centralized list
 
 ### Workspace & Item Search
-- Quickly find workspaces and Fabric items.
+- Quickly find workspaces and Fabric item (either by name or id)
 - Navigate your Fabric environment directly from the side panel.
 
 ### Run History
 - Inspect available execution history for supported Fabric items.
 - Review run details and statuses.
 - Navigate directly to job instances.
-> The history feature was developed mainly for the DataPipelines (semantic-model refresh were not the main focus)
+> The history feature was developed mainly for the DataPipelines (semantic-model refresh or Dataflows were not the main focus)
 
 ### Connection Information
 - Access Microsoft Fabric connection information.
@@ -63,6 +63,10 @@ Fabrizio is currently distributed as a browser extension project and can be load
 5. Select the project directory containing `manifest.json`.
 6. Open Microsoft Fabric and launch Fabrizio.
 
+> Since Fabrizio reads the available cache, it may be needed a first time cache clear action on Fabric tabs, or simply closing and reopening the browser.
+
+
+
 > **Note:** You must be signed in to Microsoft Fabric to use features that require authentication. Access to workspaces and items depends on your account's permissions.
 
 ## Technology
@@ -77,7 +81,7 @@ Fabrizio is built using:
 
 ## Authentication & Permissions
 
-Fabrizio works within your existing Microsoft Fabric environment and uses the access available to your signed-in account.
+Fabrizio works within your existing Microsoft Fabric environment and uses the access available to your signed-in account. Fabrizio reads the available cached tokens (per tenant id, if more than one exists) to work.
 
 - Sign in to Microsoft Fabric before using features that require authentication.
 - Your existing Microsoft Fabric permissions determine which resources you can access.
