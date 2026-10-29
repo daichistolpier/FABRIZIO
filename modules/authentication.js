@@ -15,7 +15,7 @@ export function requireAuth(token ) {
     if (token) return true;
 
     showAuthMessage(
-        "Open an authenticated Microsoft Fabric tab to use this feature."
+        "Open an authenticated Microsoft Fabric tab to use this feature, or reopen this panel."
     );
 
     return false;
@@ -35,7 +35,7 @@ export function updateAuthState(auth, selectedWs = null) {
     } else {
         showAuthMessage(
             auth?.message ??
-            "Open an authenticated Microsoft Fabric tab to continue."
+            "Open an authenticated Microsoft Fabric tab to continue, or reopen this panel."
         );
     }
 

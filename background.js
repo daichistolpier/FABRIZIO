@@ -21,8 +21,6 @@ export function isFabricTab(url = "") {
 
 
 async function getActiveTab() {
-    const tabs = await browser.tabs.query({});
-    console.log("ALL TABS", tabs);
     // Check the active tab in the current window.
     const [activeTab] = await browser.tabs.query({
         active: true,

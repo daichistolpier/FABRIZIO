@@ -93,10 +93,7 @@ export function workspaceHandler(state) {
     });
 
     // SAVE WORKSPACE TO FAVORITES
-    selectors.wsInfoContainer.addEventListener("click", async (e) => {
-
-        console.log(state)
-        
+    selectors.wsInfoContainer.addEventListener("click", async (e) => {        
         if (!requireAuth(state.token)) return;
 
         const button = e.target.closest("button");

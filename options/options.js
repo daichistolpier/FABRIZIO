@@ -162,8 +162,6 @@ document.querySelector("#resetCache").addEventListener("click", async () => {
             "fabrizioTenantId"
         ]);
 
-        console.log("Fabrizio cache reset successfully.");
-
         const status = document.querySelector("#status");
         if (status) {
             status.textContent = "Cache reset successfully.";
