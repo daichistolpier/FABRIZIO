@@ -2,13 +2,16 @@ browser.sidePanel.setPanelBehavior({
     openPanelOnActionClick: true
 });
 
-function isFabricTab(url = "") {
+export function isFabricTab(url = "") {
     try {
         const parsedUrl = new URL(url);
 
         return (
             parsedUrl.protocol === "https:" &&
-            parsedUrl.hostname === "app.fabric.microsoft.com"
+            (
+                parsedUrl.hostname === "app.fabric.microsoft.com" ||
+                parsedUrl.hostname === "app.powerbi.com"
+            )
         );
     } catch {
         return false;
@@ -18,19 +21,22 @@ function isFabricTab(url = "") {
 
 
 async function getActiveTab() {
+    const tabs = await browser.tabs.query({});
+    console.log("ALL TABS", tabs);
     // Check the active tab in the current window.
     const [activeTab] = await browser.tabs.query({
         active: true,
         currentWindow: true
     });
 
-    if (activeTab?.url?.startsWith("https://app.fabric.microsoft.com/")) {
+    if (activeTab && isFabricTab(activeTab.url)) {
         return activeTab;
     }
 
     // If the active tab isn't Fabric, find an existing Fabric tab.
     const fabricTabs = await browser.tabs.query({
-        url: ["https://app.fabric.microsoft.com/*"]
+        url: ["https://app.fabric.microsoft.com/*",
+                "https://app.powerbi.com/*"]
     });
 
     if (!fabricTabs.length) {

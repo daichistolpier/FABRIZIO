@@ -6,6 +6,10 @@ import {
     getAllWorkspaces
 } from "../modules/fabricAPIs.js"
 
+import {
+    isFabricTab
+} from "../background.js"
+
 const itemsWithHistory = ["DataPipeline", "SemanticModel"];
 const baseFabricUrl = 'https://app.fabric.microsoft.com/groups'
 
@@ -315,24 +319,9 @@ function createRenameButton() {
 }
 
 
-function isAllowedFabricUrl(value) {
-    try {
-        const url = new URL(value);
-
-        return (
-            url.protocol === "https:" &&
-            url.hostname === "app.fabric.microsoft.com"
-        );
-    } catch {
-        return false;
-    }
-}
 
 export function renderFavLinks(whereToRender, favoriteLinksList){
     whereToRender.innerHTML = '';
-    // const favHeader = document.createElement("h3");
-    // favHeader.textContent = "Favorites";
-    // whereToRender.append(favHeader)
     const favLinkList = document.createElement("div");
     favLinkList.classList.add("favLinkList");
 
@@ -342,7 +331,7 @@ export function renderFavLinks(whereToRender, favoriteLinksList){
             favLink &&
             typeof favLink.displayName === "string" &&
             typeof favLink.url === "string" &&
-            isAllowedFabricUrl(favLink.url)
+            isFabricTab(favLink.url)
         )
         .sort((a, b) =>
             a.displayName.localeCompare(b.displayName)
