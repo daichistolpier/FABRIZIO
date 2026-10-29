@@ -8,7 +8,7 @@
 Find workspaces and items, access run history, manage your favorites, and simplify repetitive tasks.
 
 <p align="center">
-  <img src="img/logo.png" alt="Fabrizio logo" width="260">
+  <img src="DEMO/logo-dark.png" alt="Fabrizio logo" width="460">
 </p>
 
 ---
