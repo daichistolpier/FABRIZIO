@@ -15,7 +15,10 @@ Find workspaces and items, access run history, manage your favorites, and simpli
 
 ## Demo
 
-https://github.com/user-attachments/assets/ab7b769c-4c6c-4e32-b034-5cb5948205ab
+
+
+https://github.com/user-attachments/assets/76b3f0e4-2ba5-4a09-ab28-cb6334bd7229
+
 
 <p align="center">
   <em>See Fabrizio in action.</em>
@@ -95,7 +98,7 @@ Before installing, review the source code and `manifest.json` to understand the 
 
 This project was originally developed to simplify repetitive tasks while working with Microsoft Fabric at my company. However, the company has since disabled browser extensions, meaning I can no longer use Fabrizio in my work environment or continue developing and testing it (especially with multi-tenant solutions).
 
-As a result, **I won't be able to provide further updates, bug fixes, or new features**.
+As a result, **no further updates, bug fixes, or new features are planned in the short run**.
 
 The repository remains public for anyone interested in exploring, using, or adapting the project. Contributions and community-maintained forks are welcome, but I cannot guarantee ongoing support or compatibility with future Microsoft Fabric updates.
 
