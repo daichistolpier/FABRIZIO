@@ -1,7 +1,6 @@
 import {
     getConnectionInfo,
-    getAllItemsFromWorkspace,
-    getJobInstance
+    getAllItemsFromWorkspace
 } from "../modules/fabricAPIs.js";
 
 import {
@@ -17,11 +16,7 @@ import {
     itemTypeFilters,
     favContainer,
     hideItemDropdown,
-    showItemDropdown,
     hideWsDropdown,
-    showWsDropdown,
-    hideTypeFilters,
-    showTypeFilters,
     jsonBeautifierInput,
     jsonbeautifierDiv,
     jsonbeautifierForm
@@ -29,14 +24,10 @@ import {
 
 import {
     renderClickedObject,
-    removeFavLink,
-    renameFavLink,
     renderFiltWsAndItems,
     filterWsAndItems,
     renderFavLinks,
     renderTypeFilters,
-    renderLatestRuns,
-    showFavItemHistoryRuns,
     renderNoFav,
     renderBeautifiedJson,
     restorePanelStates,
@@ -52,14 +43,11 @@ import {
 } from "../modules/authentication.js"
 
 
-import {
-    initVisualPanel,
-    checkActiveTab,
-    setControlsDisabled,
-    isFabricUrl
-} from "./handlers/initHandler.js";import { workspaceHandler } from "./handlers/workspaceHandler.js";
+
+import { workspaceHandler } from "./handlers/workspaceHandler.js";
 import { itemHandler} from "./handlers/itemHandler.js";
 import { favoritesHandler} from "./handlers/favoritesHandler.js";
+import { getconnectionHandler} from "./handlers/connectionInfoHandler.js";
 
 
 // VARS
@@ -115,22 +103,22 @@ hideWsDropdown();
 hideItemDropdown();
 
 // INIT FAVORITE
-if (favoriteLinks && favoriteLinks?.length) {
-    renderFavLinks(favContainer, favoriteLinks);
+if (state.favoriteLinks && state.favoriteLinks?.length) {
+    renderFavLinks(favContainer, state.favoriteLinks);
 }
 else {
     renderNoFav(favContainer)
 }
 
 //// INIT WS
-if (selectedWs) {
+if (state.selectedWs) {
     wsFoundContainer.innerHTML = "";
 
     renderClickedObject(
         "workspace",
-        selectedWs,
+        state.selectedWs,
         wsInfoContainer,
-        favoriteLinks
+        state.favoriteLinks
     );
 
     itemFormInput.disabled = !state.token;
@@ -139,8 +127,8 @@ if (selectedWs) {
 }
 
 /// INIT ITEMS
-if(selectedItems ){
-    renderClickedObject("fabricItem", selectedItems, itemInfoContainer, favoriteLinks)
+if(state.selectedItems ){
+    renderClickedObject("fabricItem", state.selectedItems, itemInfoContainer, state.favoriteLinks)
 }
 
 // EVENT LISTENERS
@@ -158,33 +146,35 @@ await restorePanelStates();
 
 
 // GET CONNECTION INFO
-getConnectionInfoDiv.addEventListener("submit", async (e) => {
-    e.preventDefault();
 
-    if (!requireAuth(state.token)) return;
+getconnectionHandler(state);
+// getConnectionInfoDiv.addEventListener("submit", async (e) => {
+//     e.preventDefault();
 
-    const inputValue = inputGetConnectionInfo.value.trim();
+//     if (!requireAuth(state.token)) return;
 
-    if (inputValue.length !== 36) {
-        inputGetConnectionInfo.value = "";
-        return;
-    }
+//     const inputValue = inputGetConnectionInfo.value.trim();
 
-    try {
-        const jsonMessage = await getConnectionInfo(inputValue, state.token);
+//     if (inputValue.length !== 36) {
+//         inputGetConnectionInfo.value = "";
+//         return;
+//     }
 
-        renderBeautifiedJson(jsonMessage, getConnectionInfoDiv);
-    } catch (error) {
-        console.error("Could not get connection info:", error);
+//     try {
+//         const jsonMessage = await getConnectionInfo(inputValue, state.token);
 
-        renderBeautifiedJson(
-            { error: error.message },
-            getConnectionInfoDiv
-        );
-    } finally {
-        inputGetConnectionInfo.value = "";
-    }
-});
+//         renderBeautifiedJson(jsonMessage, getConnectionInfoDiv);
+//     } catch (error) {
+//         console.error("Could not get connection info:", error);
+
+//         renderBeautifiedJson(
+//             { error: error.message },
+//             getConnectionInfoDiv
+//         );
+//     } finally {
+//         inputGetConnectionInfo.value = "";
+//     }
+// });
 
 
 
@@ -243,53 +233,53 @@ browser.storage.onChanged.addListener((changes, area) => {
     if (area !== "local") return;
 
     if (changes.fabrizioFavLinks) {
-        favoriteLinks = changes.fabrizioFavLinks.newValue ?? [];
+        state.favoriteLinks = changes.fabrizioFavLinks.newValue ?? [];
 
-        if (favoriteLinks.length === 0) {
+        if (state.favoriteLinks.length === 0) {
             renderNoFav(favContainer);
         } else {
-            renderFavLinks(favContainer, favoriteLinks);
+            renderFavLinks(favContainer, state.favoriteLinks);
         }
 
         renderClickedObject(
             "workspace",
-            selectedWs,
+            state.selectedWs,
             wsInfoContainer,
-            favoriteLinks
+            state.favoriteLinks
         );
 
         renderClickedObject(
             "fabricItem",
-            selectedItems,
+            state.selectedItems,
             itemInfoContainer,
-            favoriteLinks
+            state.favoriteLinks
         );
     }
 
     if (changes.fabrizioGlobalSearch) {
         const context = changes.fabrizioGlobalSearch.newValue;
 
-        selectedWs = context?.workspace ?? null;
-        selectedItems = context?.items ?? null;
+        state.selectedWs = context?.workspace ?? null;
+        state.selectedItems = context?.items ?? null;
 
-        if (selectedWs) {
+        if (state.selectedWs) {
             renderClickedObject(
                 "workspace",
-                selectedWs,
+                state.selectedWs,
                 wsInfoContainer,
-                favoriteLinks
+                state.favoriteLinks
             );
         } else {
             wsInfoContainer.innerHTML = "";
             wsFormInput.value = "";
         }
 
-        if (selectedItems) {
+        if (state.selectedItems) {
             renderClickedObject(
                 "fabricItem",
-                selectedItems,
+                state.selectedItems,
                 itemInfoContainer,
-                favoriteLinks
+                state.favoriteLinks
             );
         } else {
             itemInfoContainer.innerHTML = "";
@@ -304,13 +294,13 @@ document.querySelectorAll(".refresh-cachedObj").forEach((button) => {
         if (!requireAuth(state.token)) return;
 
         if (button.closest(".workspace--header")) {
-            allWorkspaces = null;
+            state.allWorkspaces = null;
 
-            allWorkspaces = await reloadWorkspaces(allWorkspaces, state.token);
+            state.allWorkspaces = await reloadWorkspaces(allWorkspaces, state.token);
 
-            if (Array.isArray(allWorkspaces)) {
+            if (Array.isArray(state.allWorkspaces)) {
                 renderFiltWsAndItems(
-                    allWorkspaces,
+                    state.allWorkspaces,
                     wsFoundContainer,
                     "fabricWs"
                 );
@@ -320,37 +310,37 @@ document.querySelectorAll(".refresh-cachedObj").forEach((button) => {
         }
 
         if (button.closest(".item--header")) {
-            if (!selectedWs) return;
+            if (!state.selectedWs) return;
 
-            const workspaceId = selectedWs.id;
+            const workspaceId = state.selectedWs.id;
 
-            itemsCache.delete(workspaceId);
-            allItems = null;
+            state.itemsCache.delete(workspaceId);
+            state.allItems = null;
 
             try {
-                allItems = await getAllItemsFromWorkspace(
+                state.allItems = await getAllItemsFromWorkspace(
                     workspaceId,
                     state.token
                 );
 
-                itemsCache.set(workspaceId, allItems);
+                state.itemsCache.set(workspaceId, state.allItems);
 
-                allItems.sort((a, b) =>
+                state.allItems.sort((a, b) =>
                     a.displayName.localeCompare(b.displayName)
                 );
 
                 renderTypeFilters(
                     itemTypeFilters,
-                    allItems,
-                    selectedTypeFilter
+                    state.allItems,
+                    state.selectedTypeFilter
                 );
 
                 filterWsAndItems(
-                    allItems,
+                    state.allItems,
                     itemFormInput,
                     itemFoundContainer,
                     "fabricItem",
-                    selectedTypeFilter,
+                    state.selectedTypeFilter,
                     itemTypeFilters,
                     true
                 );
