@@ -134,7 +134,7 @@ if (selectedWs) {
     );
 
     itemFormInput.disabled = !state.token;
-    itemFormInput.placeholder = "item...";
+    itemFormInput.placeholder = "item or id...";
     itemFormContainer.style.display = "block";
 }
 
@@ -214,7 +214,6 @@ document.querySelectorAll("details.panel-section").forEach(panel => {
 });
 
 // Restore previously saved states
-await restorePanelStates();
 await restorePanelStates();
 
 
