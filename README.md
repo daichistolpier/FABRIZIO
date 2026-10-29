@@ -35,7 +35,7 @@ Fabrizio is designed as a **single-tenant assistant**, however it can also suppo
 - Access your favorite resources from a centralized list
 
 ### Workspace & Item Search
-- Quickly find workspaces and Fabric item (either by name or id)
+- Quickly find workspaces and Fabric items (either by name or id)
 - Navigate your Fabric environment directly from the side panel.
 
 ### Run History
@@ -63,11 +63,9 @@ Fabrizio is currently distributed as a browser extension project and can be load
 5. Select the project directory containing `manifest.json`.
 6. Open Microsoft Fabric and launch Fabrizio.
 
-> Since Fabrizio reads the available cache, it may be needed a first time cache clear action on Fabric tabs, or simply closing and reopening the browser.
 
 
-
-> **Note:** You must be signed in to Microsoft Fabric to use features that require authentication. Access to workspaces and items depends on your account's permissions.
+> **Note:** You must be signed in to Microsoft Fabric to use features that require authentication. Access to workspaces and items depends on your account's permissions. Since Fabrizio reads the available cache, it may be needed a first time cache clear action on Fabric tabs, or simply closing and reopening the browser.
 
 ## Technology
 
